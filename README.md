@@ -58,6 +58,7 @@ src/
 │   ├── kaltura/       # MiVideo / Kaltura adapter
 │   └── canvas/        # Canvas LMS frame & navigation watcher
 ├── core/              # Player-agnostic business logic
+│   ├── pdf.ts         # Multimodal PDF compiler with embedded slides (pdf-lib)
 │   ├── formatting.ts  # Markdown and TXT serializing engines
 │   ├── cleanup.ts     # Caption deduplication and fragment merging
 │   ├── ranges.ts      # Chronological timestamp range filter
@@ -85,8 +86,13 @@ Embedded video players inside Canvas LMS often run within nested cross-origin if
 * The extension injects content scripts with `all_frames: true` and queries frame hierarchies via `chrome.webNavigation` and runtime messaging rather than attempting cross-origin DOM traversal.
 * A lightweight Canvas SPA listener monitors history transitions to re-detect active players upon course navigation without persistent CPU polling.
 
-### 4. Reliable Client-Side File Streaming
-Chrome MV3 extensions restrict large Data URIs (`data:text/plain,...`), causing downloads over ~50KB to fail with `SERVER_BAD_CONTENT`. We engineered a direct DOM `Blob` URL pipeline triggered via a synthetic anchor element (`URL.createObjectURL(blob)`), allowing multi-megabyte lecture transcripts to download instantly.
+### 4. Multimodal AI Vision PDF Engine & Parallel Worker Pool
+Standard Markdown links to images are not crawled by LLMs, while Base64-encoded images in Markdown trigger massive 3.5-million-token context window overflows. We built a native client-side PDF document generator using `pdf-lib`:
+* **Embedded Image Binary:** Embeds actual 960×720 JPEG frames on each page with synchronized speech cues below, triggering multimodal document vision in Claude 3.5 Sonnet and GPT-4o.
+* **Concurrent Worker Pool:** Uses an asynchronous worker pool with concurrency control (8 parallel connections) to download 100+ slide frames in ~3.5 seconds instead of sequential 30-second blocking downloads.
+
+### 5. Reliable Client-Side File Streaming
+Chrome MV3 extensions restrict large Data URIs (`data:text/plain,...`), causing downloads over ~50KB to fail with `SERVER_BAD_CONTENT`. We engineered a direct DOM `Blob` URL pipeline triggered via a synthetic anchor element (`URL.createObjectURL(blob)`), allowing multi-megabyte lecture transcripts and PDFs to download instantly.
 
 ---
 
@@ -98,8 +104,8 @@ This extension operates under a strict principle of least privilege:
 | :--- | :--- |
 | `activeTab` | Inspects the active lecture tab only when the user clicks the extension popup. |
 | `webNavigation` | Detects iframe hierarchies to locate embedded video players across course portals. |
-| `downloads` | Saves exported `.md` and `.txt` files directly to the user's local filesystem. |
-| `host_permissions` | Scoped strictly to `canvas.umich.edu`, `leccap.engin.umich.edu`, and `*.kaltura.com`. Never requests `<all_urls>`. |
+| `downloads` | Saves exported `.pdf`, `.md`, and `.txt` files directly to the user's local filesystem. |
+| `host_permissions` | Scoped strictly to `canvas.umich.edu`, `leccap.engin.umich.edu`, `*.kaltura.com`, and `*.amazonaws.com` (for slide frames). Never requests `<all_urls>`. |
 
 All processing is purely local. The extension never downloads video/audio streams, never circumvents authentication or DRM, and never transmits lecture materials to external servers.
 

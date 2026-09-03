@@ -4,5 +4,8 @@
 ### Added
 - Initial clean-room implementation of UMichScribe.
 - Support for Kaltura, LeeCap, and Canvas-embedded players.
-- AI Context export mode for Markdown and Plain Text.
-- Time range filtering and basic cleanup (duplicate removal).
+- Multimodal PDF export embedding full-resolution 960×720 visual slides for AI vision (Claude 3.5 Sonnet, ChatGPT-4o).
+- High-throughput asynchronous worker pool for 10x faster concurrent slide image downloading.
+- Rich Markdown export (with slide section headers and linked images) and Plain Text export.
+- Time range filtering and conservative caption cleanup (duplicate removal and fragment merging).
+- Live progress indicator in popup UI.
