@@ -75,8 +75,10 @@ function showExportPanel() {
   badge.className = 'status-badge status-ready';
 
   if (currentResult) {
-    document.getElementById('stats-display')!.textContent = 
-      `Segments: ${currentResult.segments.length} | Markers: ${currentResult.markers.length}`;
+    const segEl = document.getElementById('stats-segments');
+    if (segEl) segEl.textContent = `${currentResult.segments.length.toLocaleString()} Cues`;
+    const markerEl = document.getElementById('stats-markers');
+    if (markerEl) markerEl.textContent = `${currentResult.markers.length.toLocaleString()} Slides`;
       
     updateFilename();
   }

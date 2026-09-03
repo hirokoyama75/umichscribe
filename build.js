@@ -23,6 +23,7 @@ async function doBuild() {
 
   fs.copyFileSync('manifest.json', 'dist/manifest.json');
   fs.copyFileSync('src/icon.svg', 'dist/icon.svg');
+  fs.copyFileSync('src/icon.svg', 'dist/popup/icon.svg');
   fs.copyFileSync('src/popup/index.html', 'dist/popup/index.html');
   fs.copyFileSync('src/popup/popup.css', 'dist/popup/popup.css');
   

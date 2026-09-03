@@ -2,71 +2,111 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lecture Transcript Exporter</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>Transcript Exporter</h1>
-      <div id="status-badge" class="status-badge status-loading">Loading...</div>
-    </header>
-    
-    <div id="diagnostics-panel" class="hidden">
-      <p id="status-message">Checking page for transcript...</p>
-      <button id="btn-copy-diagnostics" class="secondary">Copy Diagnostics</button>
-      <p style="font-size: 11px; margin-top: 10px;">
-        Paste diagnostics in a <a href="https://github.com/HiroK/lecture-transcript-exporter/issues" target="_blank">GitHub Issue</a>.
-      </p>
-    </div>
-
-    <div id="export-panel" class="hidden">
-      <div class="field-group">
-        <label for="mode-select">Content Mode</label>
-        <select id="mode-select">
-          <option value="ai_context" selected>AI Context (Includes Slides/Chapters)</option>
-          <option value="transcript">Transcript Only</option>
-        </select>
-      </div>
-
-      <div class="field-group">
-        <label for="format-select">Format</label>
-        <select id="format-select">
-          <option value="txt" selected>Plain Text (.txt)</option>
-          <option value="md">Markdown (.md)</option>
-        </select>
-      </div>
-
-      <div class="field-group checkbox-group">
-        <input type="checkbox" id="timestamps-check" checked>
-        <label for="timestamps-check">Include timestamps</label>
-      </div>
-      
-      <div class="field-group checkbox-group">
-        <input type="checkbox" id="cleanup-check" checked>
-        <label for="cleanup-check">Clean up transcript (remove duplicates/merge)</label>
-      </div>
-
-      <div class="field-group">
-        <label>Time Range (Optional)</label>
-        <div class="time-inputs">
-          <input type="number" id="start-time" placeholder="Start (sec)" min="0">
-          <input type="number" id="end-time" placeholder="End (sec)" min="0">
+    <header class="app-header">
+      <div class="branding">
+        <img src="../icon.svg" class="app-logo" alt="Extension Logo" width="28" height="28">
+        <div>
+          <h1 class="app-title">Transcript Exporter</h1>
+          <div class="app-subtitle">U-M Lecture Capture</div>
         </div>
       </div>
-      
-      <div class="field-group">
-        <label for="filename-input">Filename</label>
-        <input type="text" id="filename-input">
+      <div id="status-badge" class="status-badge status-loading">Detecting</div>
+    </header>
+
+    <div id="diagnostics-panel" class="panel hidden">
+      <div class="info-card">
+        <p id="status-message" class="status-text">Scanning current page for lecture player...</p>
+      </div>
+      <button id="btn-copy-diagnostics" class="btn btn-secondary">Copy Diagnostics</button>
+      <div class="help-links">
+        Need help? <a href="https://github.com/hirokoyama75/lecture-transcript-exporter/issues" target="_blank" rel="noreferrer">Open GitHub Issue</a>
+      </div>
+    </div>
+
+    <div id="export-panel" class="panel hidden">
+      <!-- Detection summary pill badges -->
+      <div class="metrics-row" id="metrics-container">
+        <div class="metric-chip" id="chip-segments">
+          <span class="metric-icon">💬</span>
+          <span class="metric-label" id="stats-segments">0 Segments</span>
+        </div>
+        <div class="metric-chip" id="chip-slides">
+          <span class="metric-icon">🖼️</span>
+          <span class="metric-label" id="stats-markers">0 Slides</span>
+        </div>
       </div>
 
-      <div class="stats" id="stats-display">
-        Segments: 0 | Markers: 0
+      <div class="control-card">
+        <div class="field-group">
+          <label for="mode-select">Export Mode</label>
+          <div class="select-wrapper">
+            <select id="mode-select">
+              <option value="ai_context" selected>AI Context (Slides + Transcript)</option>
+              <option value="transcript">Transcript Only (Pure text)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="format-select">Format</label>
+          <div class="select-wrapper">
+            <select id="format-select">
+              <option value="md" selected>Markdown (.md) - Best for AI & Notes</option>
+              <option value="txt">Plain Text (.txt)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="toggles-grid">
+          <label class="toggle-control">
+            <input type="checkbox" id="timestamps-check" checked>
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-text">Timestamps</span>
+          </label>
+
+          <label class="toggle-control">
+            <input type="checkbox" id="cleanup-check" checked>
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-text">Merge cues</span>
+          </label>
+        </div>
+
+        <div class="field-group">
+          <label>Time Range (Optional)</label>
+          <div class="time-range-inputs">
+            <div class="input-with-affix">
+              <input type="number" id="start-time" placeholder="Start" min="0">
+              <span class="affix">sec</span>
+            </div>
+            <span class="range-separator">to</span>
+            <div class="input-with-affix">
+              <input type="number" id="end-time" placeholder="End" min="0">
+              <span class="affix">sec</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="filename-input">Filename</label>
+          <input type="text" id="filename-input" class="text-input" spellcheck="false">
+        </div>
       </div>
 
-      <div class="actions">
-        <button id="btn-copy" class="primary">Copy to Clipboard</button>
-        <button id="btn-download" class="primary">Download</button>
+      <div class="actions-group">
+        <button id="btn-copy" class="btn btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          Copy
+        </button>
+        <button id="btn-download" class="btn btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Download
+        </button>
       </div>
     </div>
   </div>

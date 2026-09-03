@@ -68,7 +68,8 @@ export class LeeCapAdapter {
                 const timeSec = typeof t[1] === 'number' ? t[1] : parseFloat(t[1]);
                 let imageUrl: string | undefined;
                 if (thumbFolder) {
-                  imageUrl = `https:${prefix}${sitekey}/${thumbFolder}/t${imgNum}.jpg`;
+                  // High-resolution full slide (e.g. 0.jpg, 18.jpg) instead of tiny thumbnail (t0.jpg)
+                  imageUrl = `https:${prefix}${sitekey}/${thumbFolder}/${imgNum}.jpg`;
                 }
                 return {
                   start: timeSec,
@@ -215,6 +216,8 @@ export class LeeCapAdapter {
             if (imageUrl.startsWith('//')) {
               imageUrl = 'https:' + imageUrl;
             }
+            // Upgrade thumbnail URL (e.g. /t18.jpg) to full resolution (/18.jpg)
+            imageUrl = imageUrl.replace(/\/t(\d+\.jpg)$/, '/$1');
           }
         }
 
