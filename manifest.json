@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "Lecture Transcript Exporter",
+  "name": "UMichScribe: Lecture Transcript Exporter",
   "version": "1.0.0",
-  "description": "Exports transcripts from U-M lecture videos for study and AI-assisted review. Unofficial.",
+  "description": "Exports synchronized lecture transcripts and high-res slides from U-M lecture videos for study and AI review. Unofficial.",
   "browser_specific_settings": {
     "gecko": {
-      "id": "lecture-transcript-exporter@hirok",
+      "id": "umichscribe@hirok",
       "strict_min_version": "109.0"
     }
   },
@@ -22,7 +22,7 @@
   ],
   "action": {
     "default_popup": "popup/index.html",
-    "default_title": "Export Transcript",
+    "default_title": "UMichScribe - Export Transcript",
     "default_icon": "icon.svg"
   },
   "icons": {

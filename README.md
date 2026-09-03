@@ -1,4 +1,4 @@
-# Lecture Transcript Exporter
+# UMichScribe: U-M Lecture Transcript & Slide Exporter
 
 [![CI](https://github.com/hirokoyama75/lecture-transcript-exporter/actions/workflows/ci.yml/badge.svg)](https://github.com/hirokoyama75/lecture-transcript-exporter/actions/workflows/ci.yml)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-blue.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
@@ -7,7 +7,7 @@
 
 > **Disclaimer:** Unofficial tool. Not affiliated with, endorsed by, or sponsored by the University of Michigan, Instructure, or Kaltura.
 
-**Lecture Transcript Exporter** is an original, privacy-first Manifest V3 browser extension for Firefox and Chromium browsers that extracts synchronized transcripts and high-definition slide milestones from university lecture recordings.
+**UMichScribe** is an original, privacy-first Manifest V3 browser extension for Firefox and Chromium browsers that extracts synchronized transcripts and high-definition slide milestones from University of Michigan lecture recordings.
 
 Designed specifically for students who want to review lectures efficiently or feed structured context into LLMs (like Claude, ChatGPT, or Gemini), it captures the spoken words alongside exact slide transition timestamps and full-resolution visual slide frames.
 

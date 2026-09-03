@@ -52,7 +52,7 @@ export function generateFilename(
     const dd = String(now.getDate()).padStart(2, '0');
     const hh = String(now.getHours()).padStart(2, '0');
     const min = String(now.getMinutes()).padStart(2, '0');
-    base = `lecture-transcript-${now.getFullYear()}-${mm}-${dd}-${hh}${min}`;
+    base = `umichscribe-transcript-${now.getFullYear()}-${mm}-${dd}-${hh}${min}`;
   }
 
   return `${base}.${ext}`;

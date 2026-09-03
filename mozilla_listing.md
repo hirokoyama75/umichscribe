@@ -1,12 +1,12 @@
-# Lecture Transcript Exporter
+# UMichScribe: U-M Lecture Transcript & Slide Exporter
 
 *Unofficial — not affiliated with or endorsed by the University of Michigan, Instructure, or Kaltura.*
 
-Export transcripts from university lecture videos for study and AI-assisted review. 
+Export synchronized lecture transcripts and high-definition slide milestones from University of Michigan lecture videos for study and AI-assisted review.
 
 ## Features
+- **AI Context Mode:** Export a structured view containing slide boundaries, high-resolution slide frames, chapter titles, and embedded transcript text.
 - **Transcript Extraction:** Easily copy or download transcripts in Markdown (.md) or Plain Text (.txt).
-- **AI Context Mode:** Export a structured view containing slide boundaries, chapter titles, and embedded transcript text.
 - **Privacy First:** All extraction runs locally in your browser. No analytics, no server uploads, no external AI service. 
 
 ## Permissions

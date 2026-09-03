@@ -1,17 +1,27 @@
 {
-  "name": "um-transcript",
+  "name": "umichscribe",
   "version": "1.0.0",
   "main": "index.js",
+  "description": "UMichScribe: Unofficial Lecture Transcript & Slide Exporter for University of Michigan courses.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
     "build": "node build.js",
+    "lint": "web-ext lint -s dist",
     "package": "npx web-ext build -s dist -a artifacts --overwrite-dest"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "umich",
+    "university-of-michigan",
+    "lecture-capture",
+    "leccap",
+    "transcript",
+    "slides",
+    "study-tool",
+    "browser-extension"
+  ],
+  "author": "HiroK",
+  "license": "MIT",
   "type": "commonjs",
-  "description": "",
   "devDependencies": {
     "@types/chrome": "^0.2.8",
     "@types/jsdom": "^30.0.0",
