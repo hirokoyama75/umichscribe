@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for considering contributing to Lecture Transcript Exporter!
+Thank you for considering contributing to UMichScribe!
 
 ## Development Setup
 1. Clone this repository.

@@ -1,6 +1,6 @@
 # UMichScribe: U-M Lecture Transcript & Slide Exporter
 
-[![CI](https://github.com/hirokoyama75/lecture-transcript-exporter/actions/workflows/ci.yml/badge.svg)](https://github.com/hirokoyama75/lecture-transcript-exporter/actions/workflows/ci.yml)
+[![CI](https://github.com/hirokoyama75/umichscribe/actions/workflows/ci.yml/badge.svg)](https://github.com/hirokoyama75/umichscribe/actions/workflows/ci.yml)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-blue.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -113,8 +113,8 @@ All processing is purely local. The extension never downloads video/audio stream
 ### Setup
 ```bash
 # Clone the repository
-git clone https://github.com/hirokoyama75/lecture-transcript-exporter.git
-cd lecture-transcript-exporter
+git clone https://github.com/hirokoyama75/umichscribe.git
+cd umichscribe
 
 # Install dependencies
 npm install
