@@ -1,0 +1,35 @@
+const { build } = require('esbuild');
+const fs = require('fs');
+const path = require('path');
+
+async function doBuild() {
+  if (!fs.existsSync('dist')) fs.mkdirSync('dist');
+  if (!fs.existsSync('dist/content')) fs.mkdirSync('dist/content', { recursive: true });
+  if (!fs.existsSync('dist/popup')) fs.mkdirSync('dist/popup', { recursive: true });
+
+  await build({
+    entryPoints: ['src/content/index.ts'],
+    bundle: true,
+    outfile: 'dist/content/index.js',
+    target: 'es2022'
+  });
+
+  await build({
+    entryPoints: ['src/popup/popup.ts'],
+    bundle: true,
+    outfile: 'dist/popup/popup.js',
+    target: 'es2022'
+  });
+
+  fs.copyFileSync('manifest.json', 'dist/manifest.json');
+  fs.copyFileSync('src/icon.svg', 'dist/icon.svg');
+  fs.copyFileSync('src/popup/index.html', 'dist/popup/index.html');
+  fs.copyFileSync('src/popup/popup.css', 'dist/popup/popup.css');
+  
+  console.log('Build complete');
+}
+
+doBuild().catch(e => {
+  console.error(e);
+  process.exit(1);
+});

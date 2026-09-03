@@ -1,0 +1,138 @@
+:root {
+  --primary-color: #00274C; /* UM Blue, though we should avoid official branding, a generic blue is fine */
+  --secondary-color: #FFCB05; /* Maize */
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --border-color: #cccccc;
+  --success-color: #28a745;
+  --error-color: #dc3545;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #222222;
+    --text-color: #eeeeee;
+    --border-color: #555555;
+    --primary-color: #4a90e2;
+  }
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 16px;
+  width: 320px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+}
+
+h1 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.status-badge {
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.status-loading { background-color: #ccc; color: #000; }
+.status-ready { background-color: var(--success-color); color: #fff; }
+.status-error { background-color: var(--error-color); color: #fff; }
+
+.field-group {
+  margin-bottom: 12px;
+}
+
+.field-group label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+select, input[type="text"], input[type="number"] {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  box-sizing: border-box;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-group label {
+  margin-bottom: 0;
+  margin-left: 8px;
+  font-weight: normal;
+}
+
+.time-inputs {
+  display: flex;
+  gap: 8px;
+}
+
+.stats {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+  .stats { color: #aaa; }
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+button {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+button.primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+button.secondary {
+  background-color: #eee;
+  color: #333;
+}
+
+@media (prefers-color-scheme: dark) {
+  button.secondary { background-color: #444; color: #eee; }
+}
+
+button:hover {
+  opacity: 0.9;
+}

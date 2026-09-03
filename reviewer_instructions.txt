@@ -1,0 +1,14 @@
+# Mozilla Reviewer Instructions
+
+This extension relies on authenticated access to University of Michigan lecture videos (Canvas, Kaltura, LeeCap).
+
+Because we cannot provide our university credentials to external reviewers, we have included an HTML fixture that perfectly replicates the DOM structure of a typical supported Kaltura player.
+
+## How to Test
+
+1. Unpack the extension into Firefox.
+2. Open `dist/fixtures/kaltura.html` in a new tab.
+3. Click the extension icon.
+4. You will see that the extension successfully parses the "Invented Kaltura Player" page and offers to download the transcript and slide contexts.
+
+The extension makes no external network requests other than fetching same-origin VTT files when required (as seen in the fixture).
