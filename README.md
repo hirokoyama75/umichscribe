@@ -25,6 +25,27 @@ Designed specifically for students who want to review lectures efficiently or fe
 * **Conservative Cue Cleanup:** Intelligently merges adjacent transcript fragments and removes identical consecutive caption cues without altering professor phrasing.
 * **100% Local & Privacy-Conscious:** Zero external network calls, zero third-party analytics, zero cloud storage, and no media downloading.
 
+### 📄 Example Export Output (`.md`)
+
+```markdown
+# STATS 250 - Fall 2026
+**Date:** 2026-09-02
+---
+
+## Slide 1 [00:00]
+![Slide 1](https://s3.amazonaws.com/leccap.engin.umich.edu/media/.../0.jpg)
+
+[00:00] Thank you.
+[04:05] Okay, let's get started. Good morning, Stats 250!
+[04:18] Excellent. Perfect. Welcome to what is perhaps your more typical lecture experience.
+
+## Slide 2 [02:35]
+![Slide 2](https://s3.amazonaws.com/leccap.engin.umich.edu/media/.../18.jpg)
+
+[04:38] To begin with, every single lecture opens up with the same type of slide where we remind you of upcoming deadlines.
+[04:46] As you see, there is only one thing due at the end of the week: your practice exam prep assignment.
+```
+
 ---
 
 ## Technical Architecture & Engineering Decisions
