@@ -15,34 +15,31 @@ function formatTime(seconds?: number): string {
   const s = Math.floor(seconds % 60);
   
   if (h > 0) {
-    return `[${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}]`;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   }
-  return `[${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}]`;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
 export function formatExport(result: ExtractionResult, options: FormatOptions): string {
   let output = '';
 
+  const title = result.courseName && result.lectureTitle 
+    ? `${result.courseName} - ${result.lectureTitle}`
+    : (result.courseName || result.lectureTitle || 'Lecture Transcript');
+
   // Header
   if (options.format === 'md') {
-    if (result.lectureTitle) {
-      output += `# ${result.lectureTitle}\n\n`;
-    } else {
-      output += `# Lecture Transcript\n\n`;
-    }
+    output += `# ${title}\n\n`;
     if (result.recordingDate) {
       output += `**Date:** ${result.recordingDate}\n\n`;
     }
     if (options.includeSourceLink && options.sourceUrl) {
       output += `**Source:** [Link](${options.sourceUrl})\n\n`;
     }
+    output += `---\n\n`;
   } else {
-    if (result.lectureTitle) {
-      output += `${result.lectureTitle}\n`;
-      output += '='.repeat(result.lectureTitle.length) + '\n\n';
-    } else {
-      output += `Lecture Transcript\n==================\n\n`;
-    }
+    output += `${title}\n`;
+    output += '='.repeat(title.length) + '\n\n';
     if (result.recordingDate) {
       output += `Date: ${result.recordingDate}\n\n`;
     }
@@ -53,25 +50,27 @@ export function formatExport(result: ExtractionResult, options: FormatOptions): 
 
   const { segments, markers } = result;
 
-  if (options.mode === 'transcript') {
+  if (options.mode === 'transcript' || markers.length === 0) {
     output += formatSegments(segments, options);
   } else {
-    // AI Context mode
-    // We interleave markers and segments by time
-    // If multiple items have same time, markers go first
+    // AI Context mode: Interleave markers and segments by chronological timestamp
+    // Ensure markers are sorted
+    const sortedMarkers = [...markers].sort((a, b) => a.start - b.start);
+    const sortedSegments = [...segments].sort((a, b) => (a.start ?? 0) - (b.start ?? 0));
+
     let sIdx = 0;
     let mIdx = 0;
 
-    while (sIdx < segments.length || mIdx < markers.length) {
-      const sTime = sIdx < segments.length ? (segments[sIdx].start ?? 0) : Infinity;
-      const mTime = mIdx < markers.length ? markers[mIdx].start : Infinity;
+    while (sIdx < sortedSegments.length || mIdx < sortedMarkers.length) {
+      const sTime = sIdx < sortedSegments.length ? (sortedSegments[sIdx].start ?? 0) : Infinity;
+      const mTime = mIdx < sortedMarkers.length ? sortedMarkers[mIdx].start : Infinity;
 
-      if (mTime <= sTime && mIdx < markers.length) {
-        const marker = markers[mIdx];
+      if (mTime <= sTime && mIdx < sortedMarkers.length) {
+        const marker = sortedMarkers[mIdx];
         output += formatMarker(marker, options);
         mIdx++;
       } else {
-        const segment = segments[sIdx];
+        const segment = sortedSegments[sIdx];
         output += formatSegment(segment, options);
         sIdx++;
       }
@@ -88,7 +87,7 @@ function formatSegments(segments: TranscriptSegment[], options: FormatOptions): 
 function formatSegment(segment: TranscriptSegment, options: FormatOptions): string {
   let line = '';
   if (options.includeTimestamps && segment.start !== undefined) {
-    line += `${formatTime(segment.start)} `;
+    line += `[${formatTime(segment.start)}] `;
   }
   if (segment.speaker) {
     if (options.format === 'md') {
@@ -103,18 +102,19 @@ function formatSegment(segment: TranscriptSegment, options: FormatOptions): stri
 
 function formatMarker(marker: ContextMarker, options: FormatOptions): string {
   let block = '';
-  
+  const timeStr = formatTime(marker.start);
+  const typeLabel = marker.type === 'slide' ? 'Slide' : 'Chapter';
+  const headingTitle = marker.title || typeLabel;
+
   if (options.format === 'md') {
-    const title = marker.title ? marker.title : (marker.type === 'slide' ? 'Slide' : 'Chapter');
-    block += `## ${marker.type === 'slide' ? 'Slide' : 'Chapter'}: ${title}\n`;
-    if (options.includeTimestamps) {
-      block += `${formatTime(marker.start)}\n\n`;
-    } else {
-      block += '\n';
-    }
+    block += `## ${headingTitle} [${timeStr}]\n\n`;
     
+    if (marker.imageUrl) {
+      block += `![${headingTitle}](${marker.imageUrl})\n\n`;
+    }
+
     if (marker.description || marker.text) {
-      block += `**${marker.type === 'slide' ? 'Slide' : 'Chapter'} context**\n\n`;
+      block += `**${typeLabel} Context:**\n`;
       if (marker.description) {
         block += `${marker.description}\n\n`;
       }
@@ -122,28 +122,18 @@ function formatMarker(marker: ContextMarker, options: FormatOptions): string {
         block += `${marker.text}\n\n`;
       }
     }
-    
-    block += `**Transcript**\n\n`;
   } else {
-    const title = marker.title ? marker.title : (marker.type === 'slide' ? 'Slide' : 'Chapter');
-    block += `=== ${marker.type === 'slide' ? 'Slide' : 'Chapter'}: ${title} ===\n`;
-    if (options.includeTimestamps) {
-      block += `Time: ${formatTime(marker.start).replace('[', '').replace(']', '')}\n\n`;
-    } else {
-      block += '\n';
-    }
+    // Concise, clean plain text separator
+    block += `=== ${headingTitle} (${timeStr}) ===\n`;
     
     if (marker.description || marker.text) {
-      block += `${marker.type === 'slide' ? 'Slide' : 'Chapter'} context:\n`;
-      if (marker.description) {
-        block += `${marker.description}\n\n`;
-      }
-      if (marker.text) {
-        block += `${marker.text}\n\n`;
-      }
+      block += `[Context: `;
+      const parts = [];
+      if (marker.description) parts.push(marker.description);
+      if (marker.text) parts.push(marker.text);
+      block += parts.join(' | ') + `]\n`;
     }
-    
-    block += `Transcript:\n`;
+    block += `\n`;
   }
   
   return block;

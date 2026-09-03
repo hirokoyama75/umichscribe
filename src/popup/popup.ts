@@ -160,30 +160,35 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-download')!.addEventListener('click', () => {
     const text = getProcessedOutput();
     let filename = (document.getElementById('filename-input') as HTMLInputElement).value || 'transcript.txt';
-    // Ensure filename isn't absolutely empty
     if (!filename.trim()) filename = 'transcript.txt';
 
-    // Use data URI to avoid Blob object URL issues in MV3
-    const url = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
-    
-    chrome.downloads.download({
-      url: url,
-      filename: filename,
-      saveAs: true
-    }, (downloadId) => {
-      if (chrome.runtime.lastError) {
-        console.error("Download failed:", chrome.runtime.lastError.message);
-        // Fallback: try removing saveAs or creating a temporary link
-        if (chrome.runtime.lastError.message?.includes('filename')) {
-           // Invalid filename fallback
-           chrome.downloads.download({
-              url: url,
-              filename: 'transcript.txt',
-              saveAs: true
-           });
-        }
-      }
-    });
+    const mime = filename.endsWith('.md') ? 'text/markdown;charset=utf-8' : 'text/plain;charset=utf-8';
+    const blob = new Blob([text], { type: mime });
+    const blobUrl = URL.createObjectURL(blob);
+
+    try {
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      }, 5000);
+
+      const btn = document.getElementById('btn-download')!;
+      const old = btn.textContent;
+      btn.textContent = 'Downloaded!';
+      setTimeout(() => btn.textContent = old, 2000);
+    } catch (e) {
+      chrome.downloads.download({
+        url: blobUrl,
+        filename: filename,
+        saveAs: true
+      });
+    }
   });
 
   document.getElementById('btn-copy-diagnostics')!.addEventListener('click', () => {

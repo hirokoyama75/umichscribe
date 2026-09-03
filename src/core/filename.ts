@@ -26,6 +26,10 @@ export function generateFilename(
   mode: 'transcript' | 'ai_context',
   ext: 'md' | 'txt'
 ): string {
+  if (courseName && date) {
+    return `${sanitizeFilename(courseName)} - ${sanitizeFilename(date)}.${ext}`;
+  }
+
   const parts = [];
   
   if (courseName) {

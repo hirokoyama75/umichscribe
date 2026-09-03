@@ -11,6 +11,7 @@ export interface ContextMarker {
   title?: string;
   description?: string;
   text?: string;
+  imageUrl?: string;
 }
 
 export interface ExtractionResult {

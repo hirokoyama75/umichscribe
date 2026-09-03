@@ -45,7 +45,8 @@ describe('Filename', () => {
   });
   
   it('generates filename', () => {
-    expect(generateFilename('Math 101', 'Math 101 Course', '2023-01-01', 'transcript', 'md')).toBe('Math 101 Course - 2023-01-01 - Transcript.md');
+    expect(generateFilename('Math 101', 'Math 101 Course', '2023-01-01', 'transcript', 'md')).toBe('Math 101 Course - 2023-01-01.md');
+    expect(generateFilename('Math 101', undefined, undefined, 'transcript', 'md')).toBe('Math 101 - Transcript.md');
     expect(generateFilename(undefined, undefined, undefined, 'ai_context', 'txt')).toContain('lecture-transcript');
   });
 });
