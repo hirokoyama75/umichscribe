@@ -3,6 +3,7 @@ import { cleanupSegments } from '../core/cleanup';
 import { filterByRange } from '../core/ranges';
 import { formatExport } from '../core/formatting';
 import { generateFilename } from '../core/filename';
+import { generatePdf } from '../core/pdf';
 
 let currentResult: ExtractionResult | null = null;
 let currentDiagnostics: DiagnosticInfo | null = null;
@@ -97,17 +98,17 @@ function showError(msg: string) {
 function updateFilename() {
   if (!currentResult) return;
   const mode = (document.getElementById('mode-select') as HTMLSelectElement).value as 'transcript' | 'ai_context';
-  const format = (document.getElementById('format-select') as HTMLSelectElement).value as 'md' | 'txt';
+  const format = (document.getElementById('format-select') as HTMLSelectElement).value as 'md' | 'txt' | 'pdf';
   
   const name = generateFilename(currentResult.lectureTitle, currentResult.courseName, currentResult.recordingDate, mode, format);
   (document.getElementById('filename-input') as HTMLInputElement).value = name;
 }
 
-function getProcessedOutput(): string {
-  if (!currentResult) return '';
+function getProcessedState() {
+  if (!currentResult) return null;
   
   let mode = (document.getElementById('mode-select') as HTMLSelectElement).value as 'transcript' | 'ai_context';
-  const format = (document.getElementById('format-select') as HTMLSelectElement).value as 'md' | 'txt';
+  const format = (document.getElementById('format-select') as HTMLSelectElement).value as 'md' | 'txt' | 'pdf';
   const includeTimestamps = (document.getElementById('timestamps-check') as HTMLInputElement).checked;
   const doCleanup = (document.getElementById('cleanup-check') as HTMLInputElement).checked;
   
@@ -133,12 +134,19 @@ function getProcessedOutput(): string {
       segments: cleanupSegments(result.segments)
     };
   }
+
+  return { result, mode, format, includeTimestamps };
+}
+
+function getProcessedOutput(): string {
+  const state = getProcessedState();
+  if (!state) return '';
   
-  // Format
-  return formatExport(result, {
-    mode,
-    format,
-    includeTimestamps
+  const textFormat = state.format === 'pdf' ? 'md' : state.format;
+  return formatExport(state.result, {
+    mode: state.mode,
+    format: textFormat,
+    includeTimestamps: state.includeTimestamps
   });
 }
 
@@ -159,37 +167,93 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  document.getElementById('btn-download')!.addEventListener('click', () => {
-    const text = getProcessedOutput();
-    let filename = (document.getElementById('filename-input') as HTMLInputElement).value || 'transcript.txt';
-    if (!filename.trim()) filename = 'transcript.txt';
+  document.getElementById('btn-download')!.addEventListener('click', async () => {
+    const state = getProcessedState();
+    if (!state) return;
 
-    const mime = filename.endsWith('.md') ? 'text/markdown;charset=utf-8' : 'text/plain;charset=utf-8';
-    const blob = new Blob([text], { type: mime });
-    const blobUrl = URL.createObjectURL(blob);
+    let filename = (document.getElementById('filename-input') as HTMLInputElement).value;
+    if (!filename.trim()) {
+      filename = state.format === 'pdf' ? 'lecture.pdf' : (state.format === 'md' ? 'lecture.md' : 'lecture.txt');
+    }
 
-    try {
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = blobUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(blobUrl);
-      }, 5000);
+    const downloadBtn = document.getElementById('btn-download') as HTMLButtonElement;
+    const oldBtnText = downloadBtn.textContent;
 
-      const btn = document.getElementById('btn-download')!;
-      const old = btn.textContent;
-      btn.textContent = 'Downloaded!';
-      setTimeout(() => btn.textContent = old, 2000);
-    } catch (e) {
-      chrome.downloads.download({
-        url: blobUrl,
-        filename: filename,
-        saveAs: true
-      });
+    if (state.format === 'pdf') {
+      const progressContainer = document.getElementById('pdf-progress-container')!;
+      const progressBar = document.getElementById('pdf-progress-bar')!;
+      const progressText = document.getElementById('pdf-progress-text')!;
+
+      try {
+        downloadBtn.disabled = true;
+        progressContainer.classList.remove('hidden');
+        progressBar.style.width = '10%';
+        progressText.textContent = 'Initializing PDF...';
+
+        const pdfBlob = await generatePdf(state.result, {
+          mode: state.mode,
+          format: 'txt',
+          includeTimestamps: state.includeTimestamps
+        }, (cur, total) => {
+          const pct = Math.min(95, Math.round((cur / total) * 100));
+          progressBar.style.width = `${pct}%`;
+          progressText.textContent = `Embedding slide ${cur} of ${total}...`;
+        });
+
+        progressBar.style.width = '100%';
+        progressText.textContent = 'PDF generated!';
+
+        const blobUrl = URL.createObjectURL(pdfBlob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+          progressContainer.classList.add('hidden');
+        }, 3000);
+
+        downloadBtn.textContent = 'Downloaded!';
+        setTimeout(() => {
+          downloadBtn.textContent = oldBtnText;
+          downloadBtn.disabled = false;
+        }, 2000);
+      } catch (err) {
+        console.error("PDF generation failed:", err);
+        progressText.textContent = 'PDF export failed. Try Markdown.';
+        downloadBtn.disabled = false;
+      }
+    } else {
+      // Fast text/markdown download
+      const text = getProcessedOutput();
+      const mime = filename.endsWith('.md') ? 'text/markdown;charset=utf-8' : 'text/plain;charset=utf-8';
+      const blob = new Blob([text], { type: mime });
+      const blobUrl = URL.createObjectURL(blob);
+
+      try {
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        }, 5000);
+
+        downloadBtn.textContent = 'Downloaded!';
+        setTimeout(() => downloadBtn.textContent = oldBtnText, 2000);
+      } catch (e) {
+        chrome.downloads.download({
+          url: blobUrl,
+          filename: filename,
+          saveAs: true
+        });
+      }
     }
   });
 

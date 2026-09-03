@@ -57,8 +57,9 @@
           <label for="format-select">Format</label>
           <div class="select-wrapper">
             <select id="format-select">
-              <option value="md" selected>Markdown (.md) - Best for AI & Notes</option>
-              <option value="txt">Plain Text (.txt)</option>
+              <option value="pdf" selected>PDF (.pdf) - Embedded Slides (Best for AI Vision)</option>
+              <option value="md">Markdown (.md) - Best for Notes & AI</option>
+              <option value="txt">Plain Text (.txt) - Pure Text</option>
             </select>
           </div>
         </div>
@@ -96,6 +97,13 @@
           <label for="filename-input">Filename</label>
           <input type="text" id="filename-input" class="text-input" spellcheck="false">
         </div>
+      </div>
+
+      <div id="pdf-progress-container" class="progress-container hidden">
+        <div class="progress-bar-track">
+          <div id="pdf-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+        <div id="pdf-progress-text" class="progress-text">Preparing PDF...</div>
       </div>
 
       <div class="actions-group">

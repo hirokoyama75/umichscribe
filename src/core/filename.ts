@@ -24,7 +24,7 @@ export function generateFilename(
   courseName: string | undefined,
   date: string | undefined, 
   mode: 'transcript' | 'ai_context',
-  ext: 'md' | 'txt'
+  ext: 'md' | 'txt' | 'pdf'
 ): string {
   if (courseName && date) {
     return `${sanitizeFilename(courseName)} - ${sanitizeFilename(date)}.${ext}`;

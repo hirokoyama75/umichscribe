@@ -21,7 +21,8 @@
     "https://*.instructure.com/*",
     "https://canvas.umich.edu/*",
     "https://leccap.engin.umich.edu/*",
-    "https://*.kaltura.com/*"
+    "https://*.kaltura.com/*",
+    "https://*.amazonaws.com/*"
   ],
   "action": {
     "default_popup": "popup/index.html",

@@ -18,7 +18,8 @@ Designed specifically for students who want to review lectures efficiently or fe
 * **AI Context Export:** Interleaves lecture transcripts with synchronized slide boundaries, numbering (`Slide 1`, `Slide 2`), timestamps, and 960×720 high-resolution visual slide images.
 * **Transcript-Only Mode:** Offers a clean, continuous text export without slide markers for linear reading.
 * **Format Flexibility:**
-  * **Markdown (`.md`):** Rich formatting with section headers, timestamped cues, bold speaker labels, and embedded visual slide images. Ideal for Obsidian, Notion, GitHub, and multimodal AI prompting.
+  * **PDF Document (`.pdf` — Default):** Embeds high-definition 960×720 visual slide images directly on each page alongside synchronized speech cues. Specifically engineered so AI models (Claude 3.5 Sonnet, ChatGPT-4o) can visually read diagrams, plots, equations, and code using their native document vision parsers.
+  * **Markdown (`.md`):** Rich formatting with section headers, timestamped cues, bold speaker labels, and embedded visual slide images. Ideal for Obsidian, Notion, GitHub, and text-based AI prompting.
   * **Plain Text (`.txt`):** Lightweight, zero-dependency text formatted for universal scratchpads and standard terminal tools.
 * **Automatic File Naming:** Automatically discovers course codes and lecture recording dates to generate clean filenames (e.g., `STATS 250 - 2026-09-02.md`).
 * **Time Range Filtering:** Choose custom start and end times to export specific problem walkthroughs or lecture segments.

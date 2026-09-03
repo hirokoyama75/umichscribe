@@ -47,6 +47,38 @@ describe('Filename', () => {
   it('generates filename', () => {
     expect(generateFilename('Math 101', 'Math 101 Course', '2023-01-01', 'transcript', 'md')).toBe('Math 101 Course - 2023-01-01.md');
     expect(generateFilename('Math 101', undefined, undefined, 'transcript', 'md')).toBe('Math 101 - Transcript.md');
+    expect(generateFilename('Math 101', 'Math 101 Course', '2023-01-01', 'ai_context', 'pdf')).toBe('Math 101 Course - 2023-01-01.pdf');
     expect(generateFilename(undefined, undefined, undefined, 'ai_context', 'txt')).toContain('umichscribe-transcript');
+  });
+});
+
+describe('PDF Generation', () => {
+  it('generates a valid PDF blob', async () => {
+    const { generatePdf } = await import('../src/core/pdf');
+    const result: ExtractionResult = {
+      lectureTitle: 'Test Lecture',
+      courseName: 'STATS 250',
+      recordingDate: '2026-09-02',
+      segments: [
+        { start: 0, end: 10, text: 'Welcome to class' },
+        { start: 10, end: 20, text: 'Here are the announcements' }
+      ],
+      markers: [
+        { start: 0, type: 'slide', title: 'Slide 1' }
+      ]
+    };
+
+    let progressCalls = 0;
+    const blob = await generatePdf(result, {
+      mode: 'ai_context',
+      format: 'txt',
+      includeTimestamps: true
+    }, () => {
+      progressCalls++;
+    });
+
+    expect(blob).toBeDefined();
+    expect(blob.size).toBeGreaterThan(500);
+    expect(progressCalls).toBeGreaterThan(0);
   });
 });

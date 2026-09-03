@@ -8,7 +8,7 @@ export interface FormatOptions {
   sourceUrl?: string; // sanitized URL if source link is enabled
 }
 
-function formatTime(seconds?: number): string {
+export function formatTime(seconds?: number): string {
   if (seconds === undefined || isNaN(seconds)) return '';
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
