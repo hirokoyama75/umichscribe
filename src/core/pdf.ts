@@ -16,6 +16,34 @@ async function fetchImageBytes(url: string): Promise<ArrayBuffer | null> {
   }
 }
 
+// Parallel worker pool to download images with high concurrency
+async function fetchAllImagesParallel(
+  urls: (string | undefined)[],
+  concurrency = 8,
+  onBatchProgress?: (completed: number, total: number) => void
+): Promise<(ArrayBuffer | null)[]> {
+  const results: (ArrayBuffer | null)[] = new Array(urls.length).fill(null);
+  let currentIndex = 0;
+  let completed = 0;
+
+  async function worker() {
+    while (currentIndex < urls.length) {
+      const idx = currentIndex++;
+      const url = urls[idx];
+      if (url) {
+        results[idx] = await fetchImageBytes(url);
+      }
+      completed++;
+      if (onBatchProgress) onBatchProgress(completed, urls.length);
+    }
+  }
+
+  const poolSize = Math.max(1, Math.min(concurrency, urls.length));
+  const workers = Array.from({ length: poolSize }, () => worker());
+  await Promise.all(workers);
+  return results;
+}
+
 // Helper to wrap text lines to fit a max point width
 function wrapText(text: string, maxPoints: number, font: any, fontSize: number): string[] {
   const words = text.split(' ');
@@ -39,7 +67,7 @@ function wrapText(text: string, maxPoints: number, font: any, fontSize: number):
 export async function generatePdf(
   result: ExtractionResult,
   options: FormattingOptions,
-  onProgress?: (current: number, total: number) => void
+  onProgress?: (current: number, total: number, phase?: 'fetching' | 'compiling') => void
 ): Promise<Blob> {
   const pdfDoc = await PDFDocument.create();
   const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -116,8 +144,13 @@ export async function generatePdf(
       currentY -= 4;
     }
   } else {
-    // AI Context Mode: 1 Slide per page with high-res image and cues
+    // AI Context Mode: Pre-fetch all images concurrently with worker pool
     const totalSlides = markers.length;
+    const imageUrls = markers.map(m => m.imageUrl);
+
+    const fetchedImages = await fetchAllImagesParallel(imageUrls, 8, (completed, total) => {
+      if (onProgress) onProgress(completed, total, 'fetching');
+    });
 
     for (let i = 0; i < markers.length; i++) {
       const marker = markers[i];
@@ -125,7 +158,7 @@ export async function generatePdf(
       const slideNum = i + 1;
 
       if (onProgress) {
-        onProgress(slideNum, totalSlides);
+        onProgress(slideNum, totalSlides, 'compiling');
       }
 
       let page = pdfDoc.addPage([pageWidth, pageHeight]);
@@ -172,25 +205,23 @@ export async function generatePdf(
       });
       currentY -= 18;
 
-      // Embed Slide Image (4:3 aspect ratio)
-      if (marker.imageUrl) {
-        const imgBytes = await fetchImageBytes(marker.imageUrl);
-        if (imgBytes) {
-          try {
-            const img = await pdfDoc.embedJpg(imgBytes);
-            const imgWidth = contentWidth;
-            const imgHeight = (contentWidth * 3) / 4; // ~383 points
+      // Embed Pre-Fetched Slide Image
+      const imgBytes = fetchedImages[i];
+      if (imgBytes) {
+        try {
+          const img = await pdfDoc.embedJpg(imgBytes);
+          const imgWidth = contentWidth;
+          const imgHeight = (contentWidth * 3) / 4; // ~383 points
 
-            page.drawImage(img, {
-              x: margin,
-              y: currentY - imgHeight,
-              width: imgWidth,
-              height: imgHeight
-            });
-            currentY -= (imgHeight + 16);
-          } catch (err) {
-            console.warn("pdf-lib embed image error:", err);
-          }
+          page.drawImage(img, {
+            x: margin,
+            y: currentY - imgHeight,
+            width: imgWidth,
+            height: imgHeight
+          });
+          currentY -= (imgHeight + 16);
+        } catch (err) {
+          console.warn("pdf-lib embed image error:", err);
         }
       }
 

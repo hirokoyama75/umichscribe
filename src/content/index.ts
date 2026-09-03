@@ -2,6 +2,7 @@ import { KalturaAdapter } from '../adapters/kaltura';
 import { LeeCapAdapter } from '../adapters/leccap';
 import { CanvasAdapter } from '../adapters/canvas';
 import { DiagnosticInfo } from '../core/types';
+import { generatePdf } from '../core/pdf';
 
 const adapters = [
   new KalturaAdapter(),
@@ -35,6 +36,10 @@ if (canvasAdapter.isMatch(location.href)) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === 'EXTRACT_TRANSCRIPT') {
     handleExtraction().then(sendResponse);
+    return true; // async
+  }
+  if (request.type === 'START_BACKGROUND_PDF') {
+    handleBackgroundPdf(request.payload).then(sendResponse);
     return true; // async
   }
 });
@@ -108,3 +113,36 @@ async function handleExtraction() {
     };
   }
 }
+
+async function handleBackgroundPdf(payload: { result: any; options: any; filename: string }) {
+  try {
+    const pdfBlob = await generatePdf(payload.result, payload.options, (cur, total, phase) => {
+      chrome.runtime.sendMessage({
+        type: 'PDF_PROGRESS',
+        cur,
+        total,
+        phase
+      }).catch(() => {
+        // popup might be closed, which is fine!
+      });
+    });
+
+    const blobUrl = URL.createObjectURL(pdfBlob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = blobUrl;
+    a.download = payload.filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    }, 15000);
+
+    return { status: 'success' };
+  } catch (err: any) {
+    console.error("Content Script PDF generation error:", err);
+    return { status: 'error', message: err?.message || 'Unknown error' };
+  }
+}
+
