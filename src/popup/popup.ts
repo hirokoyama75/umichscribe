@@ -97,14 +97,14 @@ function updateFilename() {
   const mode = (document.getElementById('mode-select') as HTMLSelectElement).value as 'transcript' | 'ai_context';
   const format = (document.getElementById('format-select') as HTMLSelectElement).value as 'md' | 'txt';
   
-  const name = generateFilename(currentResult.lectureTitle, currentResult.recordingDate, mode, format);
+  const name = generateFilename(currentResult.lectureTitle, currentResult.courseName, currentResult.recordingDate, mode, format);
   (document.getElementById('filename-input') as HTMLInputElement).value = name;
 }
 
 function getProcessedOutput(): string {
   if (!currentResult) return '';
   
-  const mode = (document.getElementById('mode-select') as HTMLSelectElement).value as 'transcript' | 'ai_context';
+  let mode = (document.getElementById('mode-select') as HTMLSelectElement).value as 'transcript' | 'ai_context';
   const format = (document.getElementById('format-select') as HTMLSelectElement).value as 'md' | 'txt';
   const includeTimestamps = (document.getElementById('timestamps-check') as HTMLInputElement).checked;
   const doCleanup = (document.getElementById('cleanup-check') as HTMLInputElement).checked;
@@ -118,6 +118,11 @@ function getProcessedOutput(): string {
   const startTime = startStr ? parseFloat(startStr) : undefined;
   const endTime = endStr ? parseFloat(endStr) : undefined;
   result = filterByRange(result, { startTime, endTime });
+  
+  // AI Context fallback
+  if (mode === 'ai_context' && result.markers.length === 0) {
+    mode = 'transcript';
+  }
   
   // Cleanup
   if (doCleanup) {
@@ -154,14 +159,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btn-download')!.addEventListener('click', () => {
     const text = getProcessedOutput();
-    const filename = (document.getElementById('filename-input') as HTMLInputElement).value || 'transcript.txt';
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
+    let filename = (document.getElementById('filename-input') as HTMLInputElement).value || 'transcript.txt';
+    // Ensure filename isn't absolutely empty
+    if (!filename.trim()) filename = 'transcript.txt';
+
+    // Use data URI to avoid Blob object URL issues in MV3
+    const url = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
     
     chrome.downloads.download({
       url: url,
       filename: filename,
       saveAs: true
+    }, (downloadId) => {
+      if (chrome.runtime.lastError) {
+        console.error("Download failed:", chrome.runtime.lastError.message);
+        // Fallback: try removing saveAs or creating a temporary link
+        if (chrome.runtime.lastError.message?.includes('filename')) {
+           // Invalid filename fallback
+           chrome.downloads.download({
+              url: url,
+              filename: 'transcript.txt',
+              saveAs: true
+           });
+        }
+      }
     });
   });
 

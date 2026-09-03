@@ -21,18 +21,21 @@ export function sanitizeFilename(name: string): string {
 
 export function generateFilename(
   title: string | undefined, 
+  courseName: string | undefined,
   date: string | undefined, 
   mode: 'transcript' | 'ai_context',
   ext: 'md' | 'txt'
 ): string {
   const parts = [];
   
-  if (date) {
-    parts.push(sanitizeFilename(date));
+  if (courseName) {
+    parts.push(sanitizeFilename(courseName));
+  } else if (title) {
+    parts.push(sanitizeFilename(title));
   }
   
-  if (title) {
-    parts.push(sanitizeFilename(title));
+  if (date) {
+    parts.push(sanitizeFilename(date));
   }
   
   parts.push(mode === 'ai_context' ? 'AI Context' : 'Transcript');

@@ -12,11 +12,18 @@ export class KalturaAdapter {
     const segments: TranscriptSegment[] = [];
     const markers: ContextMarker[] = [];
     let lectureTitle: string | undefined;
+    let courseName: string | undefined;
 
     // Try to get title from widget
     const titleEl = document.querySelector('.transcript-title, .titleLabel');
     if (titleEl) {
       lectureTitle = titleEl.textContent?.trim();
+    }
+    
+    // Try to get course name
+    const courseEl = document.querySelector('.course-name, .header-title');
+    if (courseEl) {
+      courseName = courseEl.textContent?.trim();
     }
 
     // Attempt DOM extraction first
@@ -62,7 +69,8 @@ export class KalturaAdapter {
     return {
       segments,
       markers,
-      lectureTitle
+      lectureTitle,
+      courseName
     };
   }
 

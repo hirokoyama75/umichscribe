@@ -12,11 +12,21 @@ export class LeeCapAdapter {
     const markers: ContextMarker[] = [];
     let lectureTitle: string | undefined;
     let recordingDate: string | undefined;
+    let courseName: string | undefined;
 
     // Title
     const titleEl = document.querySelector('.lecture-title, h1');
     if (titleEl) {
       lectureTitle = titleEl.textContent?.trim();
+    }
+    
+    // Course Name (often in a breadcrumb or header)
+    const courseEl = document.querySelector('.course-title, .breadcrumb a:nth-child(2), title');
+    if (courseEl) {
+       courseName = courseEl.textContent?.trim();
+       if (courseName && courseName.includes('-')) {
+          courseName = courseName.split('-')[0].trim(); // sometimes "Stats 250 - Fall 2024"
+       }
     }
 
     // Date
@@ -60,19 +70,39 @@ export class LeeCapAdapter {
     });
 
     // Slides/Chapters
-    const slideElements = document.querySelectorAll('.slide, .chapter-marker');
+    const slideElements = document.querySelectorAll('.slide, .chapter-marker, .thumbnail');
     slideElements.forEach(el => {
        const timeAttr = el.getAttribute('data-time');
-       if (!timeAttr) return;
-       const start = parseFloat(timeAttr);
+       let start: number | undefined;
+       
+       if (timeAttr) {
+         start = parseFloat(timeAttr);
+       } else if (el.classList.contains('thumbnail')) {
+         // aria-label="Thumbnail at 2 minutes 35 seconds"
+         const label = el.getAttribute('aria-label');
+         if (label && label.startsWith('Thumbnail at')) {
+           let min = 0, sec = 0, hr = 0;
+           const hrMatch = label.match(/(\d+)\s*hour/);
+           const minMatch = label.match(/(\d+)\s*minute/);
+           const secMatch = label.match(/(\d+)\s*second/);
+           if (hrMatch) hr = parseInt(hrMatch[1]);
+           if (minMatch) min = parseInt(minMatch[1]);
+           if (secMatch) sec = parseInt(secMatch[1]);
+           start = hr * 3600 + min * 60 + sec;
+         } else if (label && label.trim() === 'Thumbnail at') {
+           start = 0; // The first one sometimes just says "Thumbnail at " (time 0)
+         }
+       }
+       
+       if (start === undefined) return;
        
        const title = el.querySelector('.title, .slide-title')?.textContent?.trim();
        const text = el.querySelector('.slide-text')?.textContent?.trim();
        
        markers.push({
          start,
-         type: el.classList.contains('slide') ? 'slide' : 'chapter',
-         title,
+         type: (el.classList.contains('slide') || el.classList.contains('thumbnail')) ? 'slide' : 'chapter',
+         title: title || `Slide`, // fallback title
          text
        });
     });
@@ -83,6 +113,7 @@ export class LeeCapAdapter {
       segments,
       markers,
       lectureTitle,
+      courseName,
       recordingDate
     };
   }

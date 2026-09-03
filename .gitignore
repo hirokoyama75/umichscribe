@@ -1,0 +1,16 @@
+node_modules/
+dist/
+artifacts/
+*.js
+!build.js
+!jest.config.js
+!check_chrome.js
+!find_slides.js
+!find_thumbnail.js
+!find_thumbnail2.js
+!find_transcript.js
+!grab_dom.js
+!list_classes.js
+!test_thumbnails.js
+leccap_dom.html
+classes.txt

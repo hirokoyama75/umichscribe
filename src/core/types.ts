@@ -17,6 +17,7 @@ export interface ExtractionResult {
   segments: TranscriptSegment[];
   markers: ContextMarker[];
   lectureTitle?: string;
+  courseName?: string;
   recordingDate?: string;
   language?: string;
   availableLanguages?: string[];
