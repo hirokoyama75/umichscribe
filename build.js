@@ -1,6 +1,6 @@
-const { build } = require('esbuild');
-const fs = require('fs');
-const path = require('path');
+import { build } from 'esbuild';
+import fs from 'fs';
+import path from 'path';
 
 async function doBuild() {
   if (!fs.existsSync('dist')) fs.mkdirSync('dist');

@@ -15,15 +15,15 @@ Designed specifically for students who want to review lectures efficiently or fe
 
 ## Key Features
 
-* **AI Context Export:** Interleaves lecture transcripts with synchronized slide boundaries, numbering (`Slide 1`, `Slide 2`), timestamps, and 960×720 high-resolution visual slide images.
+* **AI Context Export:** Interleaves lecture transcripts with synchronized slide boundaries, numbering (`Slide 1`, `Slide 2`), timestamps, and 960×720 visual slide frames.
 * **Transcript-Only Mode:** Offers a clean, continuous text export without slide markers for linear reading.
 * **Format Flexibility:**
-  * **PDF Document (`.pdf` — Default):** Embeds high-definition 960×720 visual slide images directly on each page alongside synchronized speech cues. Specifically engineered so AI models (Claude 3.5 Sonnet, ChatGPT-4o) can visually read diagrams, plots, equations, and code using their native document vision parsers.
-  * **Markdown (`.md`):** Rich formatting with section headers, timestamped cues, bold speaker labels, and embedded visual slide images. Ideal for Obsidian, Notion, GitHub, and text-based AI prompting.
-  * **Plain Text (`.txt`):** Lightweight, zero-dependency text formatted for universal scratchpads and standard terminal tools.
-* **Automatic File Naming:** Automatically discovers course codes and lecture recording dates to generate clean filenames (e.g., `STATS 250 - 2026-09-02.md`).
-* **Time Range Filtering:** Choose custom start and end times to export specific problem walkthroughs or lecture segments.
-* **Conservative Cue Cleanup:** Intelligently merges adjacent transcript fragments and removes identical consecutive caption cues without altering professor phrasing.
+  * **PDF Document (`.pdf` — Default):** Embeds visual slide images directly into a structured document layout alongside synchronized speech cues. Ideal for reading diagrams, equations, and code, and compatible with multimodal document analyzers (Claude, ChatGPT, Gemini).
+  * **Markdown (`.md`):** Clean formatting with section headers, timestamped cues, speaker labels, and embedded visual slide images. Ideal for Obsidian, Notion, and local notes.
+  * **Plain Text (`.txt`):** Lightweight, zero-dependency text formatted for universal scratchpads and terminal searching.
+* **Automatic File Naming:** Discovers course codes and lecture recording dates to generate clean filenames (e.g., `STATS 250 - 2026-09-02.pdf`).
+* **Time Range Filtering:** Export specific lecture intervals or problem walkthroughs by specifying start and end bounds.
+* **Caption Cue Cleanup:** Merges fragmented lines and removes duplicate caption cues while preserving original phrasing and timing.
 * **100% Local & Privacy-Conscious:** Zero external network calls, zero third-party analytics, zero cloud storage, and no media downloading.
 
 ### 📄 Example Export Output (`.md`)
@@ -86,10 +86,10 @@ Embedded video players inside Canvas LMS often run within nested cross-origin if
 * The extension injects content scripts with `all_frames: true` and queries frame hierarchies via `chrome.webNavigation` and runtime messaging rather than attempting cross-origin DOM traversal.
 * A lightweight Canvas SPA listener monitors history transitions to re-detect active players upon course navigation without persistent CPU polling.
 
-### 4. Multimodal AI Vision PDF Engine & Parallel Worker Pool
-Standard Markdown links to images are not crawled by LLMs, while Base64-encoded images in Markdown trigger massive 3.5-million-token context window overflows. We built a native client-side PDF document generator using `pdf-lib`:
-* **Embedded Image Binary:** Embeds actual 960×720 JPEG frames on each page with synchronized speech cues below, triggering multimodal document vision in Claude 3.5 Sonnet and GPT-4o.
-* **Concurrent Worker Pool:** Uses an asynchronous worker pool with concurrency control (8 parallel connections) to download 100+ slide frames in ~3.5 seconds instead of sequential 30-second blocking downloads.
+### 4. Client-Side PDF Generation & Parallel Worker Pool
+Markdown documents containing external image links frequently fail in offline viewers or AI document workflows that do not execute remote requests, while Base64-encoding dozens of full-resolution slides causes file bloat and exhausts token context windows. To resolve this, UMichScribe generates standalone PDFs entirely in the client using `pdf-lib`:
+* **Embedded Image Binaries:** Embeds compressed 960×720 JPEG frames directly on each page matched to its synchronized speech cues.
+* **Concurrent Worker Pool:** Uses an asynchronous worker pool with bounded concurrency (8 parallel connections) to download slide frames in ~3.5 seconds without exceeding browser socket limits or blocking the main thread.
 
 ### 5. Reliable Client-Side File Streaming
 Chrome MV3 extensions restrict large Data URIs (`data:text/plain,...`), causing downloads over ~50KB to fail with `SERVER_BAD_CONTENT`. We engineered a direct DOM `Blob` URL pipeline triggered via a synthetic anchor element (`URL.createObjectURL(blob)`), allowing multi-megabyte lecture transcripts and PDFs to download instantly.

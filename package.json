@@ -21,7 +21,7 @@
   ],
   "author": "HiroK",
   "license": "MIT",
-  "type": "commonjs",
+  "type": "module",
   "devDependencies": {
     "@types/chrome": "^0.2.8",
     "@types/jsdom": "^30.0.0",
@@ -30,13 +30,12 @@
     "@typescript-eslint/parser": "^8.69.0",
     "esbuild": "^0.28.2",
     "eslint": "^9.39.5",
-    "jsdom": "^27.0.1",
+    "jsdom": "^26.0.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.11",
     "web-ext": "^10.6.0"
   },
   "dependencies": {
-    "pdf-lib": "^1.17.1",
-    "puppeteer-core": "^24.43.1"
+    "pdf-lib": "^1.17.1"
   }
 }

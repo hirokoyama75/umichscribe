@@ -82,3 +82,45 @@ describe('PDF Generation', () => {
     expect(progressCalls).toBeGreaterThan(0);
   });
 });
+
+describe('WebVTT Parser', () => {
+  it('parses standard cues and extracts voice tags', async () => {
+    const { parseVtt } = await import('../src/core/vtt');
+    const vtt = `WEBVTT
+
+1
+00:00:14.500 --> 00:00:20.000
+<v Instructor>So now we're going to use the definition of an even integer.
+
+2
+00:01:05.250 --> 00:01:10.800
+Which we defined in the previous slide.
+`;
+
+    const segments = parseVtt(vtt);
+    expect(segments.length).toBe(2);
+    expect(segments[0].start).toBeCloseTo(14.5);
+    expect(segments[0].end).toBeCloseTo(20.0);
+    expect(segments[0].speaker).toBe('Instructor');
+    expect(segments[0].text).toBe("So now we're going to use the definition of an even integer.");
+
+    expect(segments[1].start).toBeCloseTo(65.25);
+    expect(segments[1].end).toBeCloseTo(70.8);
+    expect(segments[1].speaker).toBeUndefined();
+    expect(segments[1].text).toBe('Which we defined in the previous slide.');
+  });
+
+  it('handles cues with hours and strips html markup', async () => {
+    const { parseVtt } = await import('../src/core/vtt');
+    const vtt = `WEBVTT
+
+01:15:30.000 --> 01:15:35.500
+<b>Important:</b> Check the <i>formula</i> on page 4.
+`;
+    const segments = parseVtt(vtt);
+    expect(segments.length).toBe(1);
+    expect(segments[0].start).toBe(4530);
+    expect(segments[0].end).toBe(4535.5);
+    expect(segments[0].text).toBe('Important: Check the formula on page 4.');
+  });
+});
