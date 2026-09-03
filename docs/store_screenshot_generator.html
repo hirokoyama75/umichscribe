@@ -1,42 +1,279 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<style>
-  body { background: #f0f0f0; padding: 50px; font-family: sans-serif; }
-  .browser-window {
-     width: 800px; height: 600px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-     position: relative; overflow: hidden;
-  }
-  .toolbar { height: 40px; background: #e0e0e0; display: flex; align-items: center; padding: 0 10px; }
-  .address-bar { background: white; border-radius: 4px; padding: 4px 10px; flex: 1; margin: 0 20px; color: #666; font-size: 13px; }
-  .content { padding: 40px; display: flex; justify-content: space-between; }
-  .video { width: 60%; height: 300px; background: #000; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-  .popup { position: absolute; top: 45px; right: 20px; width: 320px; background: white; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); padding: 16px; border: 1px solid #ccc; }
-  .popup h3 { margin: 0 0 10px 0; font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-  .popup-row { margin-bottom: 10px; font-size: 13px; }
-  .popup-btn { background: #00274C; color: white; padding: 8px; text-align: center; border-radius: 4px; font-weight: bold; margin-top: 10px; }
-</style>
+  <meta charset="UTF-8">
+  <title>UMichScribe - Store Asset Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f172a;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+    h2 { font-size: 20px; color: #94a3b8; }
+    
+    /* 1280x800 Store Screenshot Container */
+    #store-screenshot {
+      width: 1280px;
+      height: 800px;
+      background: linear-gradient(135deg, #0b2046 0%, #1e3a8a 50%, #0f172a 100%);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      padding: 40px 60px;
+    }
+    
+    .hero-text {
+      max-width: 650px;
+      margin-top: 20px;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 203, 5, 0.15);
+      color: #ffcb05;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 13px;
+      border: 1px solid rgba(255, 203, 5, 0.3);
+      margin-bottom: 16px;
+    }
+    .hero-title {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+      background: linear-gradient(to right, #ffffff, #e2e8f0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      font-size: 18px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    /* Mockup Layout */
+    .preview-stage {
+      display: flex;
+      gap: 30px;
+      margin-top: 35px;
+      align-items: flex-start;
+    }
+
+    .mock-editor {
+      flex: 1;
+      height: 480px;
+      background: #1e293b;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .window-header {
+      height: 36px;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+    .editor-title {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-left: 10px;
+      font-family: monospace;
+    }
+    .editor-body {
+      padding: 24px;
+      color: #e2e8f0;
+      font-size: 13.5px;
+      line-height: 1.6;
+      overflow: hidden;
+    }
+    .editor-body h3 { color: #38bdf8; margin-bottom: 8px; font-size: 16px; }
+    .slide-box {
+      width: 100%;
+      height: 190px;
+      background: #334155;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      font-weight: 600;
+      margin: 12px 0 16px 0;
+      border: 1px dashed #64748b;
+    }
+
+    /* Extension Popup Mockup */
+    .mock-popup {
+      width: 320px;
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .popup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 12px;
+    }
+    .popup-title { font-weight: 700; font-size: 14px; color: #00274c; }
+    .ready-pill {
+      background: #ecfdf5;
+      color: #10b981;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid #a7f3d0;
+    }
+    .chips { display: flex; gap: 6px; margin-bottom: 12px; }
+    .chip {
+      background: #f1f5f9;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      flex: 1;
+      text-align: center;
+    }
+    .popup-field {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    .btn-mock {
+      background: #00274c;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    /* Icon Canvas Area */
+    .icon-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+    }
+    .download-btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <div class="browser-window">
-    <div class="toolbar">
-      <div>&#x25C0; &#x25B6; &#x21BB;</div>
-      <div class="address-bar">https://canvas.umich.edu/courses/1234/modules/items/5678</div>
-      <div style="width: 24px; height: 24px; background: #00274C; border-radius: 4px;"></div>
+
+  <div class="icon-box">
+    <h2>Chrome Web Store 128×128 Icon</h2>
+    <canvas id="iconCanvas" width="128" height="128"></canvas>
+    <button class="download-btn" onclick="downloadIcon()">Download icon-128.png</button>
+  </div>
+
+  <h2>Store Screenshot (1280×800 - Press Print Screen or take a screenshot of this box)</h2>
+  
+  <div id="store-screenshot">
+    <div class="hero-text">
+      <div class="hero-badge">〽️ Unofficial University of Michigan Tool</div>
+      <h1 class="hero-title">Turn 1.5-Hour Lectures Into Structured Notes & Slides</h1>
+      <p class="hero-sub">Synchronized lecture transcripts, full-resolution 960×720 slide frames, and AI-ready Markdown exports in one click.</p>
     </div>
-    <div class="content">
-      <div class="video">Lecture 7: Direct Proof</div>
-      <div style="width: 35%; padding: 20px; border-left: 1px solid #eee;">
-        <h4>Transcript</h4>
-        <p style="color: #666; font-size: 14px;">[00:14:22] Slide: Direct Proof<br><br>[00:14:25] So now we're going to use the definition...</p>
+
+    <div class="preview-stage">
+      <div class="mock-editor">
+        <div class="window-header">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+          <span class="editor-title">STATS 250 - 2026-09-02.md</span>
+        </div>
+        <div class="editor-body">
+          <h3>## Slide 2: Sampling Distributions [02:35]</h3>
+          <div class="slide-box">🖼️ [Full-Resolution 960×720 Slide Image Embedded]</div>
+          <p><span style="color:#38bdf8;">[04:38]</span> To begin with, every single lecture opens up with the same type of slide where we remind you of upcoming deadlines.</p>
+          <br>
+          <p><span style="color:#38bdf8;">[04:54]</span> As you see, there is only one thing due at the end of the week and that is your practice exam prep assignment...</p>
+        </div>
+      </div>
+
+      <div class="mock-popup">
+        <div class="popup-header">
+          <span class="popup-title">〽️ UMichScribe</span>
+          <span class="ready-pill">Ready</span>
+        </div>
+        <div class="chips">
+          <div class="chip">💬 1,035 Cues</div>
+          <div class="chip">🖼️ 118 Slides</div>
+        </div>
+        <div style="font-size:10px; font-weight:700; color:#64748b; margin-bottom:4px;">MODE</div>
+        <div class="popup-field">AI Context (Slides + Speech)</div>
+        <div style="font-size:10px; font-weight:700; color:#64748b; margin-bottom:4px;">FORMAT</div>
+        <div class="popup-field">Markdown (.md)</div>
+        <div style="font-size:10px; font-weight:700; color:#64748b; margin-bottom:4px;">FILENAME</div>
+        <div class="popup-field" style="color:#0284c7;">STATS 250 - 2026-09-02.md</div>
+        <div class="btn-mock">Download Markdown</div>
       </div>
     </div>
-    <div class="popup">
-      <h3>Transcript Exporter <span style="float:right; background: #28a745; color: white; font-size: 10px; padding: 2px 4px; border-radius: 3px;">Ready</span></h3>
-      <div class="popup-row">Mode: <strong>AI Context</strong></div>
-      <div class="popup-row">Segments: 240 | Markers: 35</div>
-      <div class="popup-btn">Download</div>
-    </div>
   </div>
+
+  <script>
+    // Draw 128x128 SVG to canvas for instant PNG export
+    const canvas = document.getElementById('iconCanvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, 128, 128);
+    };
+    img.src = '../src/icon.svg';
+
+    function downloadIcon() {
+      const a = document.createElement('a');
+      a.download = 'icon-128.png';
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    }
+  </script>
 </body>
 </html>
