@@ -187,73 +187,42 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         downloadBtn.disabled = true;
         progressContainer.classList.remove('hidden');
-        progressBar.style.width = '15%';
-        progressText.textContent = 'Background export started (safe to switch tabs)...';
+        progressBar.style.width = '10%';
+        progressText.textContent = 'Downloading slides (parallel)...';
 
-        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-        const activeTabId = tabs[0]?.id;
+        const pdfBlob = await generatePdf(state.result, {
+          mode: state.mode,
+          format: 'txt',
+          includeTimestamps: state.includeTimestamps
+        }, (cur, total, phase) => {
+          const pct = Math.min(95, Math.round((cur / total) * 100));
+          progressBar.style.width = `${pct}%`;
+          progressText.textContent = phase === 'fetching'
+            ? `Downloading slides (${cur}/${total})...`
+            : `Embedding slide ${cur} of ${total} in PDF...`;
+        });
 
-        if (activeTabId) {
-          chrome.tabs.sendMessage(activeTabId, {
-            type: 'START_BACKGROUND_PDF',
-            payload: {
-              result: state.result,
-              options: {
-                mode: state.mode,
-                format: 'txt',
-                includeTimestamps: state.includeTimestamps
-              },
-              filename
-            }
-          }).then((res) => {
-            if (res && res.status === 'success') {
-              progressBar.style.width = '100%';
-              progressText.textContent = 'PDF downloaded!';
-              downloadBtn.textContent = 'Downloaded!';
-              setTimeout(() => {
-                downloadBtn.textContent = oldBtnText;
-                downloadBtn.disabled = false;
-                progressContainer.classList.add('hidden');
-              }, 3000);
-            } else {
-              progressText.textContent = res?.message || 'Export error. Try Markdown.';
-              downloadBtn.disabled = false;
-            }
-          }).catch(async (e) => {
-            console.warn("Content script background PDF failed, running in popup fallback:", e);
-            // Fallback: generate in popup
-            const pdfBlob = await generatePdf(state.result, {
-              mode: state.mode,
-              format: 'txt',
-              includeTimestamps: state.includeTimestamps
-            }, (cur, total, phase) => {
-              const pct = Math.min(95, Math.round((cur / total) * 100));
-              progressBar.style.width = `${pct}%`;
-              progressText.textContent = phase === 'fetching'
-                ? `Downloading slides (${cur}/${total})...`
-                : `Compiling PDF (${cur}/${total})...`;
-            });
+        progressBar.style.width = '100%';
+        progressText.textContent = 'PDF generated!';
 
-            const blobUrl = URL.createObjectURL(pdfBlob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = blobUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-              document.body.removeChild(a);
-              URL.revokeObjectURL(blobUrl);
-              progressContainer.classList.add('hidden');
-            }, 3000);
+        const blobUrl = URL.createObjectURL(pdfBlob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+          progressContainer.classList.add('hidden');
+        }, 3000);
 
-            downloadBtn.textContent = 'Downloaded!';
-            setTimeout(() => {
-              downloadBtn.textContent = oldBtnText;
-              downloadBtn.disabled = false;
-            }, 2000);
-          });
-        }
+        downloadBtn.textContent = 'Downloaded!';
+        setTimeout(() => {
+          downloadBtn.textContent = oldBtnText;
+          downloadBtn.disabled = false;
+        }, 2000);
       } catch (err) {
         console.error("PDF generation failed:", err);
         progressText.textContent = 'PDF export failed. Try Markdown.';
@@ -297,21 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const old = btn.textContent;
       btn.textContent = 'Copied!';
       setTimeout(() => btn.textContent = old, 2000);
-    }
-  });
-
-  // Listen for live progress from content script
-  chrome.runtime.onMessage.addListener((msg) => {
-    if (msg.type === 'PDF_PROGRESS') {
-      const progressBar = document.getElementById('pdf-progress-bar');
-      const progressText = document.getElementById('pdf-progress-text');
-      if (progressBar && progressText) {
-        const pct = Math.min(95, Math.round((msg.cur / msg.total) * 100));
-        progressBar.style.width = `${pct}%`;
-        progressText.textContent = msg.phase === 'fetching'
-          ? `Downloading slides (${msg.cur}/${msg.total})...`
-          : `Compiling PDF (${msg.cur}/${msg.total})...`;
-      }
     }
   });
 });
