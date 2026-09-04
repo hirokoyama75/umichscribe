@@ -21,7 +21,12 @@ async function doBuild() {
     target: 'es2022'
   });
 
+  if (!fs.existsSync('dist/icons')) fs.mkdirSync('dist/icons', { recursive: true });
+
   fs.copyFileSync('manifest.json', 'dist/manifest.json');
+  if (fs.existsSync('src/icons')) {
+    fs.cpSync('src/icons', 'dist/icons', { recursive: true });
+  }
   fs.copyFileSync('src/icon.svg', 'dist/icon.svg');
   fs.copyFileSync('src/icon.svg', 'dist/popup/icon.svg');
   fs.copyFileSync('src/popup/index.html', 'dist/popup/index.html');

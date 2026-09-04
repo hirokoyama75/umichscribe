@@ -6,6 +6,7 @@
   "scripts": {
     "test": "vitest run",
     "build": "node build.js",
+    "icons": "./scripts/generate_icons.sh",
     "lint": "web-ext lint -s dist",
     "package": "npx web-ext build -s dist -a artifacts --overwrite-dest"
   },
