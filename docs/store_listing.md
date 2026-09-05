@@ -8,10 +8,11 @@ This document contains the exact metadata, short summary, and detailed descripti
 
 * **Extension Name:** `UMichScribe: U-M Lecture Transcript & Slide Exporter`
 * **Short Name:** `UMichScribe`
-* **Version:** `1.0.0`
+* **Version:** `1.0.1`
 * **Category:** `Productivity` / `Education`
 * **Language:** `English`
 * **Homepage / Support URL:** `https://github.com/hirokoyama75/umichscribe`
+* **Privacy Policy URL:** `https://github.com/hirokoyama75/umichscribe/blob/main/PRIVACY.md`
 
 ---
 
@@ -92,5 +93,25 @@ Designed for students who want to study efficiently or feed rich lecture context
 | `activeTab` | Required to read the lecture video player DOM and extract transcript text only when the student explicitly clicks the extension popup. |
 | `webNavigation` | Required to detect nested iframe player hierarchies inside Canvas LMS course modules without cross-origin DOM traversal. |
 | `downloads` | Required to save the compiled `.pdf`, `.md`, and `.txt` lecture files directly to the user's computer. |
-| `host_permissions` (`canvas.umich.edu`, `leccap.engin.umich.edu`, `*.kaltura.com`, `*.amazonaws.com`) | Scoped strictly to U-M course platforms to detect lecture players, and Amazon S3 to download the student's authorized slide frames for PDF compilation. |
+| `host_permissions` (`canvas.umich.edu`, `leccap.engin.umich.edu`, `*.kaltura.com`, `s3.amazonaws.com`) | Scoped strictly to U-M course platforms to detect lecture players, and Amazon S3 to download the student's authorized slide frames for PDF compilation. |
 | `data_collection_permissions` (`none`) | The extension collects 0 user data, stores 0 credentials, and operates 100% client-side in browser memory. |
+
+---
+
+## 6. Chrome Web Store: Authentication & Test Instructions (Copy-Paste)
+
+> **Important:** Chrome Web Store reviewers cannot log into U-M student portals. When filling out the **"Authentication and test accounts"** tab in the Chrome Developer Dashboard, paste the following explanation along with a link to an unlisted screencast/demo video showing the extension in action:
+
+```text
+This extension is an academic study tool designed specifically for University of Michigan students and operates exclusively on authenticated campus lecture systems (canvas.umich.edu, leccap.engin.umich.edu, and MiVideo/Kaltura players).
+
+Because these platforms require active university student credentials with Duo multi-factor authentication, external test accounts cannot be created.
+
+To facilitate your review and verify complete functionality, we have provided an unlisted demonstration screencast video demonstrating the extension detecting lecture players, extracting synchronized transcripts, and compiling notes:
+[INSERT YOUR UNLISTED YOUTUBE OR GOOGLE DRIVE DEMO LINK HERE]
+
+Key points for review:
+1. The extension executes 100% locally in browser memory and collects zero user data.
+2. It makes no remote network calls other than fetching authorized slide thumbnails from S3 when exporting to PDF.
+3. The source code is open and audited at https://github.com/hirokoyama75/umichscribe.
+```

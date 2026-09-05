@@ -1,14 +1,16 @@
 {
   "name": "umichscribe",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "description": "UMichScribe: Unofficial Lecture Transcript & Slide Exporter for University of Michigan courses.",
   "scripts": {
     "test": "vitest run",
     "build": "node build.js",
+    "build:firefox": "node build.js --firefox",
     "icons": "./scripts/generate_icons.sh",
     "lint": "web-ext lint -s dist",
-    "package": "npx web-ext build -s dist -a artifacts --overwrite-dest"
+    "package": "node build.js && npx web-ext build -s dist -a artifacts --overwrite-dest",
+    "package:chrome": "node build.js && npx web-ext build -s dist -a artifacts --filename umichscribe-chrome-v1.0.1.zip --overwrite-dest"
   },
   "keywords": [
     "umich",
