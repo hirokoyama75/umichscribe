@@ -1,4 +1,4 @@
-# UMichScribe — Firefox AMO Store Listing
+# UMichScribe Firefox AMO Store Listing
 
 ### Summary (Short Description)
 Export synchronized U-M lecture transcripts and high-res slides into AI-ready PDFs and Markdown notes. 100% private and client-side.
@@ -8,7 +8,7 @@ Export synchronized U-M lecture transcripts and high-res slides into AI-ready PD
 ### Description
 UMichScribe is a privacy-first, open-source browser extension that extracts synchronized lecture transcripts and high-definition slide milestones from University of Michigan lecture recordings (LecCap, Kaltura, and Canvas LMS).
 
-Designed for students who want to study efficiently or feed rich lecture context into modern multimodal AI models (Claude 3.5 Sonnet, ChatGPT-4o, and Gemini), UMichScribe pairs spoken instructor dialogue with the exact visual slide frame being discussed.
+Designed for students who want to study efficiently or feed rich lecture context into modern multimodal AI models, UMichScribe pairs spoken instructor dialogue with the exact visual slide frame being discussed.
 
 #### 🌟 Key Features
 * 📄 **Embedded PDF Export (Best for AI Vision):** Embeds full-resolution 960×720 visual slide captures directly on each page alongside synchronized speech cues for multimodal AI inspection.
