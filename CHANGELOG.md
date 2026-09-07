@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1] - 2026-09-04
+### Fixed
+- Chrome Web Store compliance: Replaced SVG icons with PNG icons (16×16, 32×32, 48×48, 128×128).
+- Tailored manifest build pipeline to strip Firefox-specific `browser_specific_settings` in Chrome distribution.
+- Narrowed host permission from wildcard `*.amazonaws.com` to `s3.amazonaws.com` under Principle of Least Privilege.
+- Added comprehensive `PRIVACY.md` detailing 100% client-side execution and zero data collection.
+
 ## [1.0.0] - 2026-09-03
 ### Added
 - Initial clean-room implementation of UMichScribe.
