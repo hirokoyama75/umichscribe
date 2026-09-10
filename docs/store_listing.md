@@ -56,6 +56,11 @@ Designed for students who want to study efficiently or feed rich lecture context
 * 🧹 **Conservative Caption Cleanup:**
   Intelligently merges fragmented captions and removes duplicate cues without altering professor phrasing or meaning.
 
+* 🎓 **Built-in 2-Stage AI Study Pipeline:**
+  Includes one-click prompts and an in-popup study guide:
+  * **Step 1 (Reconstructor Prompt):** Upload your PDF to Claude, ChatGPT, or Gemini to extract missed deadlines/announcements and split the lecture into self-contained tutoring packets.
+  * **Step 2 (Interactive Tutor Prompt):** Paste into a fresh chat with one packet to receive 1-on-1 Socratic tutoring with checkpoint questions and mastery tracking.
+
 ---
 
 ### 🔒 100% Private & Client-Side

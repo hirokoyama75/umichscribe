@@ -4,6 +4,7 @@ import { filterByRange } from '../core/ranges';
 import { formatExport } from '../core/formatting';
 import { generateFilename } from '../core/filename';
 import { generatePdf } from '../core/pdf';
+import { RECONSTRUCTION_PROMPT, TUTOR_PROMPT } from '../core/prompts';
 
 let currentResult: ExtractionResult | null = null;
 let currentDiagnostics: DiagnosticInfo | null = null;
@@ -371,4 +372,67 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.textContent = oldText;
     }, 2000);
   });
+
+  async function copyTextToClipboard(text: string, btn: HTMLElement, successText = 'Copied! ✓') {
+    const originalHtml = btn.innerHTML;
+    let copied = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        copied = true;
+      } else {
+        copied = fallbackCopyText(text);
+      }
+    } catch {
+      copied = fallbackCopyText(text);
+    }
+
+    if (copied) {
+      btn.innerHTML = successText;
+      setTimeout(() => {
+        btn.innerHTML = originalHtml;
+      }, 2000);
+    }
+  }
+
+  // Guide Modal Controls
+  const modal = document.getElementById('guide-modal');
+  const openModal = () => modal?.classList.remove('hidden');
+  const closeModal = () => modal?.classList.add('hidden');
+
+  document.getElementById('btn-open-guide')?.addEventListener('click', openModal);
+  document.getElementById('btn-view-guide-link')?.addEventListener('click', openModal);
+  document.getElementById('btn-close-modal')?.addEventListener('click', closeModal);
+  document.getElementById('btn-modal-done')?.addEventListener('click', closeModal);
+
+  // Close modal when clicking outside on overlay background
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+      closeModal();
+    }
+  });
+
+  // Prompt 1 Copy (Reconstructor)
+  const copyP1 = (btn: HTMLElement) => copyTextToClipboard(RECONSTRUCTION_PROMPT, btn, 'Copied! ✓');
+  document.getElementById('btn-copy-prompt-reconstruct')?.addEventListener('click', (e) => {
+    copyP1(e.currentTarget as HTMLElement);
+  });
+  document.getElementById('btn-modal-copy-p1')?.addEventListener('click', (e) => {
+    copyP1(e.currentTarget as HTMLElement);
+  });
+
+  // Prompt 2 Copy (Tutor)
+  const copyP2 = (btn: HTMLElement) => copyTextToClipboard(TUTOR_PROMPT, btn, 'Copied! ✓');
+  document.getElementById('btn-copy-prompt-tutor')?.addEventListener('click', (e) => {
+    copyP2(e.currentTarget as HTMLElement);
+  });
+  document.getElementById('btn-modal-copy-p2')?.addEventListener('click', (e) => {
+    copyP2(e.currentTarget as HTMLElement);
+  });
 });
+

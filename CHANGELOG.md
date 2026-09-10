@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3] - 2026-09-10
+### Added
+- Built-in 2-Stage AI Lecture Reconstruction & Interactive Tutoring pipeline.
+- 1-click prompt copy buttons in popup for Step 1 (Lecture Reconstructor) and Step 2 (Interactive Socratic Tutor).
+- In-popup interactive "AI Study Guide" modal accessible from the header on any page.
+- Background `onUpdateAvailable` listener to apply Chrome Web Store & Firefox AMO updates smoothly.
+
 ## [1.0.2] - 2026-09-09
 ### Fixed
 - Fixed content script inactivity on tabs opened before extension was installed/reloaded via background `onInstalled` injection and popup just-in-time fallback injection.

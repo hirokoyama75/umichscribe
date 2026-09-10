@@ -16,7 +16,12 @@
           <div class="app-subtitle">U-M Lecture & Slide Exporter</div>
         </div>
       </div>
-      <div id="status-badge" class="status-badge status-loading">Detecting</div>
+      <div class="header-actions">
+        <button id="btn-open-guide" class="btn-guide" title="AI Study Guide & Prompts">
+          <span class="guide-icon">💡</span> Guide
+        </button>
+        <div id="status-badge" class="status-badge status-loading">Detecting</div>
+      </div>
     </header>
 
     <div id="diagnostics-panel" class="panel hidden">
@@ -115,6 +120,97 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
           Download
         </button>
+      </div>
+
+      <!-- AI Tutoring System Section -->
+      <div class="ai-prompts-card">
+        <div class="ai-card-header">
+          <div class="ai-title-row">
+            <span class="ai-badge">AI TUTOR PIPELINE</span>
+            <button id="btn-view-guide-link" class="link-btn">How it works →</button>
+          </div>
+          <p class="ai-subtitle">Turn your lecture into interactive 1-on-1 AI tutoring</p>
+        </div>
+        <div class="ai-button-grid">
+          <button id="btn-copy-prompt-reconstruct" class="btn btn-prompt" title="Step 1: Reconstruct lecture into tutoring packets & missed info">
+            <span class="step-tag">Step 1</span>
+            <span class="btn-prompt-text">Reconstruct</span>
+            <span class="copy-icon">📋</span>
+          </button>
+          <button id="btn-copy-prompt-tutor" class="btn btn-prompt" title="Step 2: Socratic 1-on-1 interactive tutor for packets">
+            <span class="step-tag">Step 2</span>
+            <span class="btn-prompt-text">AI Tutor</span>
+            <span class="copy-icon">📋</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Study Guide Modal -->
+    <div id="guide-modal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <h2 class="modal-title">AI Study Guide</h2>
+            <div class="modal-subtitle">How to study missed lectures with AI</div>
+          </div>
+          <button id="btn-close-modal" class="modal-close-btn" aria-label="Close modal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="guide-intro-banner">
+            Don’t settle for generic 5-bullet summaries. Use this 2-step pipeline to extract missed course actions and get taught 1-on-1:
+          </div>
+
+          <div class="guide-step">
+            <div class="guide-step-header">
+              <span class="guide-step-num">1</span>
+              <span class="guide-step-title">Export Lecture as PDF</span>
+            </div>
+            <p class="guide-step-desc">Select <strong>AI Context</strong> & <strong>PDF</strong>. The PDF embeds full-resolution slide images alongside synchronized speech so AI vision models can read math, diagrams, and code.</p>
+          </div>
+
+          <div class="guide-step">
+            <div class="guide-step-header">
+              <span class="guide-step-num">2</span>
+              <span class="guide-step-title">Reconstruct the Lecture</span>
+            </div>
+            <p class="guide-step-desc">Open the AI of your choice (e.g., Gemini, ChatGPT, Claude). Upload your PDF and paste the <strong>Step 1 Reconstructor Prompt</strong>.</p>
+            <div class="guide-output-box">
+              <div class="output-box-title">What it produces:</div>
+              <ul class="output-list">
+                <li>Checklist of missed deadlines, homework & exam info</li>
+                <li>Self-contained, modular <strong>Tutoring Packets</strong></li>
+              </ul>
+            </div>
+            <button id="btn-modal-copy-p1" class="btn btn-prompt-modal">
+              📋 Copy Step 1 Prompt (Reconstructor)
+            </button>
+          </div>
+
+          <div class="guide-step">
+            <div class="guide-step-header">
+              <span class="guide-step-num">3</span>
+              <span class="guide-step-title">Learn with Your 1-on-1 AI Tutor</span>
+            </div>
+            <p class="guide-step-desc">Open a <strong>fresh AI chat</strong>. Paste the <strong>Step 2 Tutor Prompt</strong>, then append <strong>ONE packet</strong> from Step 2 at the bottom under <code>PACKET TO TEACH:</code>.</p>
+            <div class="guide-output-box">
+              <div class="output-box-title">How the AI teaches:</div>
+              <ul class="output-list">
+                <li>Teaches concept-by-concept with interactive checkpoints</li>
+                <li>Never gives away answers or jumps ahead before you understand</li>
+                <li>Generates a mastery handoff note when you finish</li>
+              </ul>
+            </div>
+            <button id="btn-modal-copy-p2" class="btn btn-prompt-modal">
+              📋 Copy Step 2 Prompt (Interactive Tutor)
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-modal-done" class="btn btn-primary btn-full">Got it!</button>
+        </div>
       </div>
     </div>
   </div>

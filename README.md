@@ -23,7 +23,9 @@ Designed specifically for students who want to review lectures efficiently or fe
   * **Plain Text (`.txt`):** Lightweight, zero-dependency text formatted for universal scratchpads and terminal searching.
 * **Automatic File Naming:** Discovers course codes and lecture recording dates to generate clean filenames (e.g., `STATS 250 - 2026-09-02.pdf`).
 * **Time Range Filtering:** Export specific lecture intervals or problem walkthroughs by specifying start and end bounds.
-* **Caption Cue Cleanup:** Merges fragmented lines and removes duplicate caption cues while preserving original phrasing and timing.
+* **Built-in 2-Stage AI Study Pipeline:** Includes one-click prompts and an in-extension study guide to turn raw lecture exports into private interactive AI tutoring sessions:
+  * **Step 1 (Reconstructor Prompt):** Upload your PDF to Claude, ChatGPT, or Gemini to extract missed deadlines/announcements and split the lecture into self-contained tutoring packets.
+  * **Step 2 (Interactive Tutor Prompt):** Paste into a fresh AI chat with one packet to receive 1-on-1 Socratic tutoring with checkpoint questions and mastery tracking.
 * **100% Local & Privacy-Conscious:** Zero external network calls, zero third-party analytics, zero cloud storage, and no media downloading.
 
 ### 📄 Example Export Output (`.md`)

@@ -35,3 +35,12 @@ chrome.runtime.onInstalled.addListener(async () => {
     console.warn('[UMichScribe] Background onInstalled auto-injection encountered an error:', err);
   }
 });
+
+// Auto-apply Web Store updates when a new version is downloaded in the background
+if (chrome.runtime && chrome.runtime.onUpdateAvailable) {
+  chrome.runtime.onUpdateAvailable.addListener((details) => {
+    console.log(`[UMichScribe] New version ${details.version} downloaded. Applying update...`);
+    chrome.runtime.reload();
+  });
+}
+
