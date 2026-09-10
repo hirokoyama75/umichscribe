@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2] - 2026-09-09
+### Fixed
+- Fixed content script inactivity on tabs opened before extension was installed/reloaded via background `onInstalled` injection and popup just-in-time fallback injection.
+- Fixed "Copy Diagnostics" button failing silently when connection to content script could not be established.
+- Added clipboard copy fallback (`document.execCommand('copy')`) and dynamic button state feedback ("Copied!" / "Copy Failed").
+- Declared `"scripting"` and `"clipboardWrite"` permissions across Chrome and Firefox MV3.
+
 ## [1.0.1] - 2026-09-04
 ### Fixed
 - Chrome Web Store compliance: Replaced SVG icons with PNG icons (16×16, 32×32, 48×48, 128×128).

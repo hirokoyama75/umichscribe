@@ -8,6 +8,54 @@ import { generatePdf } from '../core/pdf';
 let currentResult: ExtractionResult | null = null;
 let currentDiagnostics: DiagnosticInfo | null = null;
 
+async function queryFrames(tabId: number): Promise<chrome.webNavigation.GetAllFrameResultDetails[] | null> {
+  return new Promise<chrome.webNavigation.GetAllFrameResultDetails[] | null>((resolve) => {
+    chrome.webNavigation.getAllFrames({ tabId }, (res) => resolve(res || null));
+  });
+}
+
+async function trySendExtraction(tabId: number): Promise<any> {
+  const frames = await queryFrames(tabId);
+
+  if (!frames) {
+    try {
+      return await chrome.tabs.sendMessage(tabId, { type: 'EXTRACT_TRANSCRIPT' });
+    } catch {
+      return null;
+    }
+  }
+
+  let bestResponse: any = null;
+  for (const frame of frames) {
+    try {
+      const response = await chrome.tabs.sendMessage(tabId, { type: 'EXTRACT_TRANSCRIPT' }, { frameId: frame.frameId });
+      if (response && response.status === 'ready') {
+        return response;
+      } else if (response) {
+        bestResponse = response;
+      }
+    } catch {
+      // ignore inactive frames
+    }
+  }
+  return bestResponse;
+}
+
+async function injectContentScript(tabId: number): Promise<boolean> {
+  try {
+    if (chrome.scripting && chrome.scripting.executeScript) {
+      await chrome.scripting.executeScript({
+        target: { tabId, allFrames: true },
+        files: ['content/index.js']
+      });
+      return true;
+    }
+  } catch {
+    // Restricted or unsupported page
+  }
+  return false;
+}
+
 async function requestExtraction() {
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
   const activeTab = tabs[0];
@@ -18,52 +66,35 @@ async function requestExtraction() {
   }
 
   try {
-    const frames = await new Promise<chrome.webNavigation.GetAllFrameResultDetails[] | null>((resolve) => {
-      chrome.webNavigation.getAllFrames({ tabId: activeTab.id! }, (res) => resolve(res || null));
-    });
+    let response = await trySendExtraction(activeTab.id);
 
-    if (!frames) {
-      // Fallback
-      const response = await chrome.tabs.sendMessage(activeTab.id, { type: 'EXTRACT_TRANSCRIPT' });
-      handleResponse(response);
-      return;
-    }
-
-    // Try all frames
-    let bestResponse: any = null;
-    
-    for (const frame of frames) {
-      try {
-        const response = await chrome.tabs.sendMessage(activeTab.id, { type: 'EXTRACT_TRANSCRIPT' }, { frameId: frame.frameId });
-        if (response && response.status === 'ready') {
-          handleResponse(response);
-          return;
-        } else if (response) {
-          bestResponse = response;
-        }
-      } catch (e) {
-        // ignore inactive frames
+    // If no frame responded, tab may have been opened before extension install/update.
+    // Attempt just-in-time programmatic injection and retry.
+    if (!response) {
+      const injected = await injectContentScript(activeTab.id);
+      if (injected) {
+        response = await trySendExtraction(activeTab.id);
       }
     }
 
-    if (bestResponse) {
-      handleResponse(bestResponse);
+    if (response) {
+      handleResponse(response, activeTab);
     } else {
-      showError("Could not connect to the page. Is this a supported lecture page?");
+      showError("Could not connect to the page. Is this a supported lecture page?", activeTab);
     }
   } catch (error) {
-    showError("Could not connect to the page. Is this a supported lecture page?");
+    showError("Could not connect to the page. Is this a supported lecture page?", activeTab);
   }
 }
 
-function handleResponse(response: any) {
+function handleResponse(response: any, tab?: chrome.tabs.Tab) {
   if (response && response.status === 'ready') {
     currentResult = response.result;
     currentDiagnostics = response.diagnostics;
     showExportPanel();
   } else {
-    showError(response?.errorReason || "No transcript found on this page.");
-    currentDiagnostics = response?.diagnostics;
+    currentDiagnostics = response?.diagnostics || null;
+    showError(response?.errorReason || "No transcript found on this page.", tab);
   }
 }
 
@@ -85,7 +116,7 @@ function showExportPanel() {
   }
 }
 
-function showError(msg: string) {
+function showError(msg: string, tab?: chrome.tabs.Tab) {
   document.getElementById('export-panel')!.classList.add('hidden');
   document.getElementById('diagnostics-panel')!.classList.remove('hidden');
   document.getElementById('status-message')!.textContent = msg;
@@ -93,6 +124,29 @@ function showError(msg: string) {
   const badge = document.getElementById('status-badge')!;
   badge.textContent = 'Error';
   badge.className = 'status-badge status-error';
+
+  if (!currentDiagnostics) {
+    let hostname = 'unknown';
+    if (tab?.url) {
+      try {
+        hostname = new URL(tab.url).hostname;
+      } catch {
+        hostname = tab.url;
+      }
+    }
+    currentDiagnostics = {
+      version: chrome.runtime.getManifest().version,
+      browser: navigator.userAgent,
+      adapterPlatform: 'none',
+      urlPattern: hostname,
+      status: 'error',
+      errorCode: msg,
+      segmentCount: 0,
+      markerCount: 0,
+      isFrame: false,
+      dynamicLoading: false
+    };
+  }
 }
 
 function updateFilename() {
@@ -259,13 +313,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  document.getElementById('btn-copy-diagnostics')!.addEventListener('click', () => {
-    if (currentDiagnostics) {
-      navigator.clipboard.writeText(JSON.stringify(currentDiagnostics, null, 2));
-      const btn = document.getElementById('btn-copy-diagnostics')!;
-      const old = btn.textContent;
-      btn.textContent = 'Copied!';
-      setTimeout(() => btn.textContent = old, 2000);
+  function fallbackCopyText(text: string): boolean {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    textarea.style.top = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textarea);
+    return successful;
+  }
+
+  document.getElementById('btn-copy-diagnostics')!.addEventListener('click', async () => {
+    const btn = document.getElementById('btn-copy-diagnostics')!;
+    const oldText = btn.textContent || 'Copy Diagnostics';
+
+    const diagToCopy = currentDiagnostics || {
+      version: chrome.runtime.getManifest().version,
+      browser: navigator.userAgent,
+      adapterPlatform: 'none',
+      urlPattern: 'unknown',
+      status: 'error',
+      errorCode: 'No diagnostic information available',
+      segmentCount: 0,
+      markerCount: 0,
+      isFrame: false,
+      dynamicLoading: false
+    };
+
+    const text = JSON.stringify(diagToCopy, null, 2);
+    let copied = false;
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        copied = true;
+      } else {
+        copied = fallbackCopyText(text);
+      }
+    } catch {
+      try {
+        copied = fallbackCopyText(text);
+      } catch {
+        copied = false;
+      }
     }
+
+    if (copied) {
+      btn.textContent = 'Copied!';
+    } else {
+      btn.textContent = 'Copy Failed';
+    }
+    setTimeout(() => {
+      btn.textContent = oldText;
+    }, 2000);
   });
 });

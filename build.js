@@ -7,9 +7,17 @@ async function doBuild() {
   console.log(`Building for ${isFirefox ? 'Firefox' : 'Chrome'}...`);
 
   if (!fs.existsSync('dist')) fs.mkdirSync('dist');
+  if (!fs.existsSync('dist/background')) fs.mkdirSync('dist/background', { recursive: true });
   if (!fs.existsSync('dist/content')) fs.mkdirSync('dist/content', { recursive: true });
   if (!fs.existsSync('dist/popup')) fs.mkdirSync('dist/popup', { recursive: true });
   if (!fs.existsSync('dist/icons')) fs.mkdirSync('dist/icons', { recursive: true });
+
+  await build({
+    entryPoints: ['src/background/index.ts'],
+    bundle: true,
+    outfile: 'dist/background/index.js',
+    target: 'es2022'
+  });
 
   await build({
     entryPoints: ['src/content/index.ts'],
@@ -27,7 +35,16 @@ async function doBuild() {
 
   // Prepare manifest.json
   const manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf-8'));
-  if (!isFirefox) {
+  if (isFirefox) {
+    // Firefox MV3 event page scripts array
+    manifest.background = {
+      scripts: ['background/index.js']
+    };
+  } else {
+    // Chrome MV3 service worker
+    manifest.background = {
+      service_worker: 'background/index.js'
+    };
     // Chrome Web Store strictly rejects unrecognized keys such as browser_specific_settings
     delete manifest.browser_specific_settings;
   }

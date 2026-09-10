@@ -3,41 +3,44 @@ import { LeeCapAdapter } from '../adapters/leccap';
 import { CanvasAdapter } from '../adapters/canvas';
 import { DiagnosticInfo } from '../core/types';
 
-const adapters = [
-  new KalturaAdapter(),
-  new LeeCapAdapter(),
-  new CanvasAdapter()
-];
+if (!(window as any).__UMICHSCRIBE_CONTENT_SCRIPT_INITIALIZED__) {
+  (window as any).__UMICHSCRIBE_CONTENT_SCRIPT_INITIALIZED__ = true;
 
-let lastResult: any = null;
-let currentDiagnostic: DiagnosticInfo = {
-  version: "1.0.0",
-  browser: "unknown",
-  adapterPlatform: "none",
-  urlPattern: location.hostname,
-  status: "unsupported",
-  segmentCount: 0,
-  markerCount: 0,
-  isFrame: window !== window.top,
-  dynamicLoading: false
-};
+  const adapters = [
+    new KalturaAdapter(),
+    new LeeCapAdapter(),
+    new CanvasAdapter()
+  ];
 
-// Canvas SPA support
-const canvasAdapter = new CanvasAdapter();
-if (canvasAdapter.isMatch(location.href)) {
-  canvasAdapter.setupNavigationListener(() => {
-    // When canvas navigates, we reset our state
-    lastResult = null;
-    currentDiagnostic.status = "unsupported";
-  });
-}
+  let lastResult: any = null;
+  let currentDiagnostic: DiagnosticInfo = {
+    version: chrome.runtime.getManifest().version,
+    browser: navigator.userAgent,
+    adapterPlatform: "none",
+    urlPattern: location.hostname,
+    status: "unsupported",
+    segmentCount: 0,
+    markerCount: 0,
+    isFrame: window !== window.top,
+    dynamicLoading: false
+  };
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === 'EXTRACT_TRANSCRIPT') {
-    handleExtraction().then(sendResponse);
-    return true; // async
+  // Canvas SPA support
+  const canvasAdapter = new CanvasAdapter();
+  if (canvasAdapter.isMatch(location.href)) {
+    canvasAdapter.setupNavigationListener(() => {
+      // When canvas navigates, we reset our state
+      lastResult = null;
+      currentDiagnostic.status = "unsupported";
+    });
   }
-});
+
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.type === 'EXTRACT_TRANSCRIPT') {
+      handleExtraction().then(sendResponse);
+      return true; // async
+    }
+  });
 
 async function handleExtraction() {
   const url = location.href;
@@ -108,4 +111,6 @@ async function handleExtraction() {
     };
   }
 }
+}
+
 
