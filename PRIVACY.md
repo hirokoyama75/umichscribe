@@ -27,6 +27,8 @@ In strict accordance with the Chrome Web Store and Mozilla Add-on Least Privileg
 | `activeTab` | Grants temporary access to read closed captions and slide markers from the active lecture recording player only when you open the extension popup. |
 | `webNavigation` | Required to query iframe hierarchies so the extension can locate embedded video players (such as Kaltura or LecCap) embedded inside Canvas LMS modules without cross-origin DOM violations. |
 | `downloads` | Required to save your generated `.pdf`, `.md`, or `.txt` lecture study files directly to your local computer's download folder. |
+| `scripting` | Used to programmatically inject the extraction script into lecture player frames if the lecture page was opened prior to extension install or reload. |
+| `clipboardWrite` | Used to allow students to copy extracted lecture transcripts and AI study prompts directly to their clipboard with one click. |
 | Host: `canvas.umich.edu` | Allows reading captions and lecture metadata on University of Michigan Canvas course pages. |
 | Host: `leccap.engin.umich.edu` | Allows reading caption tracks and slide timing metadata on Michigan Engineering Lecture Capture players. |
 | Host: `*.kaltura.com` | Allows reading caption tracks on embedded MiVideo / Kaltura lecture players. |

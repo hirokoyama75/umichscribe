@@ -98,6 +98,8 @@ Designed for students who want to study efficiently or feed rich lecture context
 | `activeTab` | Required to read the lecture video player DOM and extract transcript text only when the student explicitly clicks the extension popup. |
 | `webNavigation` | Required to detect nested iframe player hierarchies inside Canvas LMS course modules without cross-origin DOM traversal. |
 | `downloads` | Required to save the compiled `.pdf`, `.md`, and `.txt` lecture files directly to the user's computer. |
+| `scripting` | Used to programmatically inject the extraction script into lecture player frames if the page was opened before the extension was installed/reloaded. |
+| `clipboardWrite` | Required to allow users to copy extracted transcripts and AI study prompts directly to their clipboard with one click. |
 | `host_permissions` (`canvas.umich.edu`, `leccap.engin.umich.edu`, `*.kaltura.com`, `s3.amazonaws.com`) | Scoped strictly to U-M course platforms to detect lecture players, and Amazon S3 to download the student's authorized slide frames for PDF compilation. |
 | `data_collection_permissions` (`none`) | The extension collects 0 user data, stores 0 credentials, and operates 100% client-side in browser memory. |
 
