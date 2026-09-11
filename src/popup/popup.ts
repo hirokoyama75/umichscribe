@@ -374,7 +374,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   async function copyTextToClipboard(text: string, btn: HTMLElement, successText = 'Copied! ✓') {
-    const originalHtml = btn.innerHTML;
+    const textSpan = btn.querySelector('.btn-prompt-text') as HTMLElement | null;
+    const targetEl = textSpan || btn;
+    const originalText = targetEl.textContent || '';
     let copied = false;
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -388,9 +390,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (copied) {
-      btn.innerHTML = successText;
+      targetEl.textContent = successText;
       setTimeout(() => {
-        btn.innerHTML = originalHtml;
+        targetEl.textContent = originalText;
       }, 2000);
     }
   }
